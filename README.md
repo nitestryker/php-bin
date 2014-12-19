@@ -17,7 +17,7 @@ view  the project page / bug tracker [Here](https://www.hostedredmine.com/projec
 
 ### Current Version V1.0.7
 
-For the current CHANGELOG please visit [CHANGELOG](CHANGELOG)
+For the current CHANGELOG please visit [CHANGELOG] (https://github.com/jeremystevens/php-bin/wiki/CHANGELOG)
 
 installation instructions
 ======
