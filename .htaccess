@@ -1,0 +1,21 @@
+Options +FollowSymLinks
+RewriteEngine ON 
+RewriteCond %{HTTP_HOST} ^127.0.0.1
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule (.*) http://nitestryker.com/pbdev/post.php?pid=$1 [R=301,L]
+# raw format
+RewriteRule ^raw/([^/.]+)/?$  /pbdev/raw/raw.php?rid=$1 [L]
+# users profiles
+RewriteRule ^u/([^/.]+)/?$  /pbdev/u/profile.php?usr=$1 [L]
+# Search archive by Syntax
+RewriteRule ^archive/([^/.]+)/?$  /pbdev/archive/searcharchive.php?syntax=$1 [L]
+#edit profile
+RewriteRule ^u/edit/([^/.]+)/?$  /pbdev/u/edit/profile.php?usr=$1 [L]
+#index
+RewriteRule ^([a-zA-Z0-9]+)/$ /pbdev/index.php?action=$1
+#post 
+RewriteRule ^([a-z][A-z]*)?$ /pbdev/post.php?pid=$1 [L]
+RewriteRule ^([0-9][0-9]*)?$ /pbdev/post.php?pid=$1 [L]
+
+
+
