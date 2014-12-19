@@ -7,13 +7,14 @@ view  the project page / bug tracker [Here](https://www.hostedredmine.com/projec
 ### Features:
 
 1. Store text online for a set period of time
-2. line numbers for debugging purposes 
-3. Download to File 
-4. Share link on facebook and twitter & Google+
-5. User registration / Profile 
-6. Visibility Options Public/ Private / Unlisted  
-7. Live recent post sidebar 
-8. Cron-job to prune expired post. 
+2. GeSHi Filter for syntax highlighting
+3. line numbers for debugging purposes 
+4. Download to File 
+5. Share link on facebook and twitter
+6. User registration / Profile 
+7. Visibility Options Public/ Private / Unlisted  
+8. Live recent post sidebar 
+9. Cron-job to prune expired post. 
 
 ### Current Version V1.0.7
 
