@@ -1,28 +1,30 @@
 language: php
 php:
-  # using major version aliases
-
-  # aliased to 5.2.17
-  - 5.2
-  # aliased to 5.3.29
-  - 5.3
-  # aliased to a recent 5.4.x version
   - 5.4
-  # aliased to a recent 5.5.x version
   - 5.5
-  # aliased to a recent 5.6.x version
   - 5.6
 
-# optionally specify a list of environments, for example to test different RDBMS
 env:
   - DB=mysql 
 
 script: phpunit --configuration phpunit.xml --coverage-text
 
+# Notifications
+
 notifications:
   email:
-    recipients:
-      - jeremiahstevens@gmail.com 
-    on_success: [always|never|change] # default: change
-    on_failure: [always|never|change] # default: always
-  irc: "chat.freenode.net#nitestryker"
+  recipients:
+      - jeremiahstevens@gmail.com
+    on_success: change
+    on_failure: always
+
+  irc:
+    on_success: change
+    on_failure: always
+    channels:
+       - "chat.freenode.net#nitestryker"
+    skip_join: true
+    template:
+      - "Build #%{build_number}: %{repository} %{branch} (%{commit}) %{author} - %{message}"
+      - "Build details: %{build_url}"
+      - "Code Changes: %{compare_url}"
