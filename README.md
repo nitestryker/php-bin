@@ -7,7 +7,7 @@ view  the project page / bug tracker [Here](https://www.hostedredmine.com/projec
 ### Features:
 
 1. Store text online for a set period of time
-2. GeSHi Filter for syntax highlighting
+2. GeSHi for syntax highlighting
 3. line numbers for debugging purposes 
 4. Download to File 
 5. Share link on facebook and twitter
