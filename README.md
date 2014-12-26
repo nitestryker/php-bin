@@ -18,7 +18,7 @@ phpbin is a PHP-based web application that allows you to store text online for a
 
 ### Current Version V1.0.7
 
-[CHANGELOG] (https://github.com/jeremystevens/php-bin/wiki/CHANGELOG) {:target="_blank"}
+[CHANGELOG] (https://github.com/jeremystevens/php-bin/wiki/CHANGELOG)
 
 [ROADMAP] (http://bt.jeremystevens.org/roadmap_page.php) 
 
