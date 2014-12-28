@@ -26,6 +26,8 @@ please report all bugs [here] (http://bt.jeremystevens.org)
 
 or via email: [bugs@jeremystevens.org] (mailto:bugs@jeremystevens.org)
 
+Please feel free to also ask question on the [Knowledge Base] (http://kb.jeremystevens.org/index.php?action=show&cat=1)
+
 installation instructions
 ======
       
