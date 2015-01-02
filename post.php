@@ -11,6 +11,7 @@
 |   Licence Info: GPL
 +------------------------------------------------
 */
+error_reporting(E_ALL);
 $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
 if ($action == "post") {
     include_once 'classes/post.class.php';
@@ -80,7 +81,13 @@ $post->getPost($pid);
 $id = $post->id;
 $post_id = $post->post_id;
 $_SESSION['post_id'] = $post_id;
+
 $posters_name = $post->posters_name;
+if ($posters_name == "guest"){
+$imagesrc = "img/no.gif";	
+}else {
+$imagesrc = "include/avatar.php?uimage=$posters_name";		
+}
 $post_title = $post->post_title;
 $post_syntax = $post->post_syntax;
 $post_exp = $post->exp_int;
@@ -110,7 +117,12 @@ $get = new post();
 $get->hits();
 
 // if the user is  a registered user update hit total count
-$regbool = $_SESSION['reguser'];
+if (isset($_SESSION['reguser']))
+{
+$regbool = $_SESSION['reguser'];	
+}else{
+  $regbool = 0;	
+}
 if ($regbool == "1"){
  // update the total hit count
  $get = new post();

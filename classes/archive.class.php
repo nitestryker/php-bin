@@ -30,16 +30,18 @@ class archive
             $this->page = 1;
         }
         $this->start_from = ($this->page - 1) * 20;
-        $sql = "SELECT * FROM public_post WHERE viewable = 1 ORDER BY post_date DESC LIMIT $this->start_from, 20";
+        $sql = "SELECT * FROM public_post  ORDER BY post_date DESC LIMIT $this->start_from, 20";
         $rs_result = mysql_query($sql, $connection);
         while ($row = mysql_fetch_assoc($rs_result)) {
             echo "<tr>";
             $postid = $row['postid'];
             $post_title = $row['post_title'];
+            $post_hits = $row['post_hits'];
             echo "<td><img src='http://icons.iconarchive.com/icons/semlabs/web-blog/48/post-remove-icon.png' height='18' width='18'>&nbsp; <a href='$postid'>$post_title</a><hr></td>";
             $my_time = strtotime($row['post_date']);
             $postdate = $this->time_since($my_time);
             echo "<td>$postdate ago<hr></td>";
+            echo "<td>$post_hits<hr></td>";
             $syn = $row['post_syntax'];
             $syntax = "<a href='archive/$syn'>$syn</a>";
             echo "<td>$syntax<hr></td>";

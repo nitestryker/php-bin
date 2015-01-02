@@ -94,7 +94,7 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="/">Pastebin Clone</a>
+            <a class="brand" href="/"><?=$config['site_name'];?></a>
 
             <div class="nav-collapse collapse">
 
@@ -160,6 +160,7 @@ if (isset($_POST['submit'])) {
                         <tr id="archive" bgcolor="">
                             <td nowrap width="35" id=""><span class="whitetext_md"><B>Name / Title</B><hr></td>
                             <td nowrap width="35"><span class="whitetext_md"><b>Posted</b><Hr></span></td>
+                            <td nowrap width="25"><span class="whitetext_md"><b>Total Hits</b><Hr></span></td>
                             <td nowrap width="35"><span class="whitetext_md"><b>Syntax</b><hr></span></td>
                         <tr> <?include 'classes/search.class.php'; $search = new searcher(); $search->searchbyname();?>
                             <?

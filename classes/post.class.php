@@ -316,7 +316,29 @@ class post
           $buser = $config['bitly_username'];
           $bkey = $config['bitly_api'];
         $slink = $this->shortLink($link,$buser,$bkey,$format='txt');
-
+         
+         // prevernt bit.ly api failure messages in db
+        switch ($slink) 
+         // TODO: log these to a file for the administrator to see. 
+        {
+        case "RATE_LIMIT_EXCEEDED":
+           $slink = " ";
+           break;
+        case "INVALID_URI":
+         $slink = "";
+          break;
+        case "MISSING_ARG_ACCESS_TOKEN":
+         $slink = "";
+          break;
+        case "MISSING_ARG_LOGIN":
+         $slink = "";
+          break;
+        case "UNKNOWN_ERROR":
+        $slink = ""; 
+           break;
+      default:
+        $slink = $slink;
+        }
         // save the post id to a session
         $_SESSION['postid'] = $post_id;
         $_SESSION['slink'] = $slink;
@@ -394,10 +416,14 @@ class post
 
                 //set viewable to false;
                 $viewable = "0";
+                
+                // let's store the users ip address
+               $users_ip = $this->get_ip();
+
 
                 //insert into personal table
                 $sql = mysql_query("INSERT INTO  userp_$uid
-	 				(postid,posters_name,post_title,post_syntax,post_exp,post_text,post_date,post_size,post_hits,viewable,bitly) VALUES('$post_id', '$posters_name','$post_title','$post_syntax','$post_exp','$post_text','$post_date','$post_size','$post_hits', '$viewable','$slink') ")
+	 				(postid,posters_name,ip,post_title,post_syntax,post_exp,post_text,post_date,post_size,post_hits,viewable,bitly) VALUES('$post_id', '$posters_name','$users_ip','$post_title','$post_syntax','$post_exp','$post_text','$post_date','$post_size','$post_hits', '$viewable','$slink') ")
                     or die(mysql_error());
 
                 if (!$sql) {
@@ -414,11 +440,13 @@ class post
 
                 // put the viewable var in a session
                 $_SESSION['viewable'] = $viewable;
-
+                
+               // let's store the users ip address
+               $users_ip = $this->get_ip();
 
                 //insert into personal table
                 $sql = mysql_query("INSERT INTO  userp_$uid
-	 				(postid,posters_name,post_title,post_syntax,post_exp,post_text,post_date,post_size,post_hits,viewable) VALUES('$post_id', '$posters_name','$post_title','$post_syntax','$post_exp','$post_text','$post_date','$post_size','$post_hits', '$viewable') ")
+	 				(postid,posters_name,ip,post_title,post_syntax,post_exp,post_text,post_date,post_size,post_hits,viewable) VALUES('$post_id', '$posters_name','$users_ip','$post_title','$post_syntax','$post_exp','$post_text','$post_date','$post_size','$post_hits', '$viewable') ")
                     or die(mysql_error());
 
                 if (!$sql) {
@@ -445,6 +473,29 @@ class post
         // shorten link for a public post by registered user
         $slink = $_SESSION['slink'];
 
+         // prevernt bit.ly api failure messages in db
+        switch ($slink) 
+         // TODO: log these to a file for the administrator to see. 
+        {
+        case "RATE_LIMIT_EXCEEDED":
+           $slink = " ";
+           break;
+        case "INVALID_URI":
+         $slink = "";
+          break;
+        case "MISSING_ARG_ACCESS_TOKEN":
+         $slink = "";
+          break;
+        case "MISSING_ARG_LOGIN":
+         $slink = "";
+          break;
+        case "UNKNOWN_ERROR":
+        $slink = ""; 
+           break;
+      default:
+        $slink = $slink;
+        }
+
         // save the post id to a session
         $_SESSION['postid'] = $post_id;
 
@@ -456,6 +507,15 @@ class post
         $exp_int = $_POST['post_exp'];
        $post_title = $_POST['post_title'];
         $posters_name = $_POST['posters_name'];
+
+       // if the post is viewable set it to 1 
+        $viewable = $_POST['exposure'];
+         if ($viewable == "public")
+         {
+         $viewable = 1;
+         } else {
+         $viewable = 0;
+          }
         // if the title is blank call it untitled
         if ($post_title == "") {
             $post_title = "untitled";
@@ -499,13 +559,15 @@ class post
         $post_size = strlen($post_text) / 1024;
         $post_size = number_format($post_size);
         $post_hits = null;
-
+        
+         // let's store the users ip address
+         $users_ip = $this->get_ip();
         // var_dump($_POST); //(debugging only)
 
 
         // MySQL query
         $sql = mysql_query("INSERT INTO public_post
-					(postid,posters_name,post_title,post_syntax,exp_int,post_exp,post_text,post_date,post_size,post_hits,bitly) VALUES('$post_id', '$posters_name','$post_title','$post_syntax','$exp_int','$post_exp','$post_text','$post_date','$post_size','$post_hits','$slink') ")
+					(postid,posters_name,ip,post_title,post_syntax,exp_int,post_exp,post_text,post_date,post_size,post_hits,bitly,viewable) VALUES('$post_id', '$posters_name','$users_ip','$post_title','$post_syntax','$exp_int','$post_exp','$post_text','$post_date','$post_size','$post_hits','$slink', '$viewable') ")
             or die(mysql_error());
 
         if (!$sql) {
@@ -546,7 +608,29 @@ class post
           $bkey = $config['bitly_api'];
         $tlink = $this->shortLink($link,$buser,$bkey,$format='txt');
         $slink = $tlink;
-        $_SESSION['poop'] = $slink;
+        // prevernt bit.ly api failure messages in db
+        switch ($slink) 
+         // TODO: log these to a file for the administrator to see. 
+        {
+        case "RATE_LIMIT_EXCEEDED":
+           $slink = " ";
+           break;
+        case "INVALID_URI":
+         $slink = "";
+          break;
+        case "MISSING_ARG_ACCESS_TOKEN":
+         $slink = "";
+          break;
+        case "MISSING_ARG_LOGIN":
+         $slink = "";
+          break;
+        case "UNKNOWN_ERROR":
+        $slink = ""; 
+           break;
+      default:
+        $slink = $slink;
+        }
+        $_SESSION['shortlink'] = $slink;
 
         // save the post id to a session
         $_SESSION['postid'] = $post_id;
@@ -555,10 +639,21 @@ class post
         $post_text = mysql_real_escape_string($_POST['post_text']);
         $post_syntax = $_POST['post_syntax'];
         $post_exp = $_POST['post_exp'];
-         $exp_int = $_POST['post_exp'];
+        $exp_int = $_POST['post_exp'];
 
         $post_title = $_POST['post_title'];
-       
+
+         // let's store the users ip address
+        $users_ip = $this->get_ip();
+
+        // if the post is viewable set it to 1 
+        $viewable = $_POST['exposure'];
+         if ($viewable == "public")
+         {
+         $viewable = 1;
+         } else {
+         $viewable = 0;
+          }
        
          // if post text is blank exit
          if (empty($post_text))
@@ -618,7 +713,7 @@ class post
 
         // MySQL query
         $sql = mysql_query("INSERT INTO public_post
-    		(postid,posters_name,post_title,post_syntax,exp_int,post_exp,post_text,post_date,post_size,post_hits,bitly) VALUES('$post_id', '$posters_name','$post_title','$post_syntax','$exp_int','$post_exp','$post_text','$post_date','$post_size','$post_hits','$slink') ")
+    		(postid,posters_name,ip,post_title,post_syntax,exp_int,post_exp,post_text,post_date,post_size,post_hits,bitly,viewable) VALUES('$post_id', '$posters_name','$users_ip','$post_title','$post_syntax','$exp_int','$post_exp','$post_text','$post_date','$post_size','$post_hits','$slink','$viewable') ")
             or die(mysql_error());
 
         if (!$sql) {
@@ -628,6 +723,39 @@ class post
        
     } // end of function
 
+         // get the users ip address 
+        function get_ip() {
+
+		//Just get the headers if we can or else use the SERVER global
+		if ( function_exists( 'apache_request_headers' ) ) {
+
+			$headers = apache_request_headers();
+
+		} else {
+
+			$headers = $_SERVER;
+
+		}
+
+		//Get the forwarded IP if it exists
+		if ( array_key_exists( 'X-Forwarded-For', $headers ) && filter_var( $headers['X-Forwarded-For'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+
+			$the_ip = $headers['X-Forwarded-For'];
+
+		} elseif ( array_key_exists( 'HTTP_X_FORWARDED_FOR', $headers ) && filter_var( $headers['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 )
+		) {
+
+			$the_ip = $headers['HTTP_X_FORWARDED_FOR'];
+
+		} else {
+			
+			$the_ip = filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+
+		}
+
+		return $the_ip;
+
+	}
 } // end of class
 
 

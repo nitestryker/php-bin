@@ -15,7 +15,6 @@
 
 // start session 
 session_start();
-
 // error reporting 
 error_reporting(0);
 $action = (isset($_GET['action'])) ? $_GET['action'] : "null";

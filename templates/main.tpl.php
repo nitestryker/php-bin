@@ -1,16 +1,27 @@
 <?php
-/*
-+------------------------------------------------
-|    main.tpl.php (main page template)
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
+# Php-bin - is a PHP-based web application that allows you to store text online 
+# for a set period of time.
+
+# php-bin is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# php-bin is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with php-bin.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * @package php-bin
+ * @copyright Copyright (C) 2013 - 2014  Jeremy Stevens - jeremiahstevens@gmail.com
+ * @copyright Copyright (C) 2013 - 2014  Nitestryker - nitestryker@gmail.com 
+ * @copyright Copyight  (c) 2013 - 2014  Nitestryker Software Inc. 
+ * @link http://www.nswebdev.com
 */
+
 error_reporting(0);
 require_once 'include/config.php';
 session_start();
@@ -141,7 +152,7 @@ if (isset($_POST['login'])) {
 
                     <!--Recent Post go here -->
                     <li>
-                        <?include 'include/live.php';?>
+                        <?php include 'include/live.php';?>
                     </li>
                 </ul>
             </div>
@@ -304,8 +315,7 @@ if (isset($_POST['login'])) {
 
 
 <footer class="span8">
-    <center><p>Pastebin Clone - developed by <a href="http://nswebdev.com" target="_BLANK">Nitestryker Software</A></p>
-    </center>
+  
 </footer>
 
 </div> <!-- /container -->

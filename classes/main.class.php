@@ -55,13 +55,13 @@ function redirect()
     }
 function report($post = null) 
  {
- 	$postid = $postid;
+    $post = $post;
     include 'include/config.php';
     $site = $config['site_url'];
     $email = $config['site_admin_email'];
    $to = $email;
-   $subject = "post #$postid was reported";
-   $message = "post #$postid was reported as a violation";
+   $subject = "post #$post was reported";
+   $message = "post #$post was reported as a violation";
    $from = "abuse@$site";
    $headers = "From: $from";
    mail($to,$subject,$message,$headers);

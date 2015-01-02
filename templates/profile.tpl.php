@@ -24,7 +24,7 @@
 
 */
 
-require_once '../include/config.php';
+include '../include/config.php';
 
 $profile = $_GET['usr'];
 
@@ -72,7 +72,7 @@ if (isset($_POST['submit'])) {
 
     $location = $_SERVER['HTTP_REFERER'];
 
- header('Refresh:1; url=index.php');
+ header('Refresh:1; url=$location');
 
 }
 
@@ -203,8 +203,8 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
 
             </a>
-
-            <a class="brand" href="/">Pastebin Clone</a>
+            
+            <a class="brand" href="/"></a>
 
 
 
@@ -224,7 +224,7 @@ if (isset($_POST['submit'])) {
 
                 <!---- login form here---->
 
-                <form class="navbar-form pull-right" action="../../index.php" method="post"/>
+                <form class="navbar-form pull-right" action="../index.php" method="post"/>
 
                 <?=$form;?></form>
 

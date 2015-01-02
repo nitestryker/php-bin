@@ -1,24 +1,24 @@
 <?php
 /*
 +------------------------------------------------
-|    search.php (archive by snytax) 
+|    archive.template.php
 |   =============================================
-|    by nitestryker
-|   (c) 2013 nitestryker Software
+|    by Nitestryker
+|   (c) 2013 Nitestryker Software
 |   http://nitestryker.net
 |   =============================================
-|   git:
+|   git: https://github.com/nitestryker/phpbin.git
 |   Licence Info: GPL
- +------------------------------------------------
++------------------------------------------------
 */
-// display results;
-require_once '../include/config.php';
+
+include_once ('include/config.php');
 session_start();
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $uid = $_SESSION['uid'];
     $user = $_SESSION['username'];
     $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='../logout.php'>logout</a>";
+    $form .= "<a href='logout.php'>logout</a>";
     $uname = $_SESSION['username'];  
 } else {
     $form = "<input type='hidden' name='login'>";
@@ -29,8 +29,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $form .= "<ul class='nav pull-right'>";
     $form .= "<li><a href='register.php'>Registration</a></li>";
 }
-include_once 'include/config.php';
-include_once 'classes/conn.class.php';
+include_once ('include/config.php');
+include_once ('classes/conn.class.php');
 if (isset($_POST['submit'])) {
     $cmd = new Conn();
     $cmd->login($_POST['username'], $_POST['password']);
@@ -38,18 +38,17 @@ if (isset($_POST['submit'])) {
       header('Refresh:1; url=$location');
 }
 ?>
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?=$config['site_name'];?></title>
+    <title><?php echo $config['site_name'];?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="rien">
     <meta name="keywords" content="rien"/>
     <meta name="author" content="Php-pastebin">
 
-    <link href="../css/style.css" rel="stylesheet">
+     <link href="../css/style.css" rel="stylesheet">
     <link href="../css/bootstrap.css" rel="stylesheet">
     <link href="../css/bootstrap-responsive.css" rel="stylesheet">
 
@@ -59,13 +58,7 @@ if (isset($_POST['submit'])) {
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <script type="text/javascript" src="../js/bootstrap.js"></script>
-    <script>
-        function textAreaAdjust(o) {
-            o.style.height = "1px";
-            o.style.height = (25 + o.scrollHeight) + "px";
-        }
-    </script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
 </head>
 
 <body>
@@ -78,17 +71,17 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="/"><?=$config['site_name'];?></a>
+            <a class="brand" href="/"><?php echo $config['site_name'];?></a>
 
             <div class="nav-collapse collapse">
 
                 <ul class="nav">
-                    <li><a href="../index.php">Add a new paste</a></li>
-                    <li><a href="../archive.php">View all pastes</a></li>
+                    <li><a href="index.php">Add a new paste</a></li>
+                    <li><a href="archive.php">View all pastes</a></li>
 
                 </ul>
                 <!---- login form here---->
-                <form class="navbar-form pull-right" action="../index.php?action=login" method="post"/>
+                <form class="navbar-form pull-right" action="<?$_SERVER[’PHP_SELF’];?>" method="post"/>
                 <?=$form;?></form>
                 <ul class="nav pull-right">
 
@@ -111,8 +104,8 @@ if (isset($_POST['submit'])) {
     <div class="row-fluid">
         <div class="span2 offset1">
             <div class="base-block">
-                <div class="title">Search By Name</b></div>
-                <form class="form-search" name="form1" method="get" action="../search.php">
+                <div class="title">Paste Search</div>
+                <form class="form-search" name="form1" method="get" action="search.php">
                     <div class="input-prepend">
 
                         <input type="text" name="term" class="span12">
@@ -126,7 +119,7 @@ if (isset($_POST['submit'])) {
 
                     <!--Recent Post go here -->
                     <li>
-                        <? include 'live.php';?>
+                        <?php include 'live.php';?>
                     </li>
                 </ul>
             </div>
@@ -136,20 +129,21 @@ if (isset($_POST['submit'])) {
 
         <div class="span8">
             <div class="base-block">
-                <div class="title"></div>
+                <div class="title"><?=$_GET['syntax'];?></div>
 
-                <img src="../img/code.jpg" height="36" width="48">&nbsp;<font size="6">Paste::Syntax:<b> <?=$_GET['syntax'];?></b></font>
+               <img src="../img/code.jpg" height="36" width="48">&nbsp; <font size="6"> Paste::Syntax:<b> <?=$_GET['syntax'];?></b></font>
 
-                <div class="c" style="font-family: monospace;">
+                 <div class="c" style="font-family: monospace;">
                     <Br><Br>
                     <table width="100%" Height="" id="archvie" border="0">
                         <tr id="archive" bgcolor="">
                             <td nowrap width="25" id=""><span class="whitetext_md"><B>Name / Title</B><hr></td>
                             <td nowrap width="25"><span class="whitetext_md"><b>Posted</b><Hr></span></td>
+                            <td nowrap width="25"><span class="whitetext_md"><b>Total Hits</b><Hr></span></td>
                             <td nowrap width="25"><span class="whitetext_md"><b>Syntax</b><hr></span></td>
                         </tr>
-                        <tr> <?include '../classes/search.class.php'; $search = new searcher(); $search->searchbysyntax();?>
-                            <?
+                        <tr> <?php include '../classes/search.class.php'; $search = new searcher(); $search->searchbysyntax();?>
+                            <?php
                             $error = $search->error;
                             if (isset($error)) {
                                 echo $error;
@@ -171,10 +165,11 @@ if (isset($_POST['submit'])) {
 
 
         <footer class="span8">
-           
+            
         </footer>
 
     </div>
     <!-- /container -->
 </body>
 </html>
+

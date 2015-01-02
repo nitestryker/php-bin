@@ -36,6 +36,7 @@ if (isset($_POST['submit'])) {
     $location = $_SERVER['HTTP_REFERER'];
  header('Refresh:1; url=$location');
 }
+$pid = $_GET['pid'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -103,7 +104,7 @@ if (isset($_POST['submit'])) {
     </div>
 </div>
 <div>
-    <Br><Br>
+    <Br>
 </div>
 </div>
 </header>
@@ -166,20 +167,24 @@ if (isset($_POST['submit'])) {
     </script>
   <script type="text/javascript">
 function doSomething() {
-    $.get('report.php?pid=<?=$post_id;?>');
-    alert("Thank you, the post was reported to the site administrator!");
+     var id =<?=$pid?>;
+     $.get('report.php?pid='+id+'');
+    alert("Thank you, the post was reported to the site administrator!"); 
+    location.reload();
     return false;
 }
 </script>
+
                 <div class="title">#<?=$post_id;?></div>
-                <img src="include/avatar.php?uimage=<?=$posters_name;?>" height=50 width=50>
+                <img src="<?=$imagesrc;?>" height=50 width=50>
                 &nbsp;&nbsp;<img src="img/notepad.png" height=30 width=30>
                 <i><b><?=$post_title;?></b></i>
                 <!--posted code goes here-->
                 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 By: <?=$namelink;?> on <?=$fdate;?> | Syntax: <a
                 href="archive/<?=$post_syntax;?>"><?=$post_syntax;?></a> | Size: <?=$post_size?> KB |
-                Hits: <?=$post_hits?>  | Expires: <?=$expires;?> |&nbsp;&nbsp;<a href="raw/<?=$post_id;?>" target="popupwindow">Raw Code</a> |<?=$link_title;?>&nbsp;<?=$bitly;?>| <a href="download.php?pid=<?=$post_id?>" target="popupwindow"> Download </a> | &nbsp;<a href="#" onclick="doSomething();">Report Abuse</a><br>
+                Hits: <?=$post_hits?>  | Expires: <?=$expires;?> |<Br>
+                <div id="options" style="position:relative;left:86px;top:21%;width:100%;"><a href="raw/<?=$post_id;?>" target="popupwindow">Raw Code</a> |<?=$link_title;?>&nbsp;<?=$bitly;?>| <a href="download.php?pid=<?=$post_id?>" target="popupwindow"> Download </a> | <a href="print/<?=$post_id?>" target="popupwindow"> Print </a> | &nbsp;<a href="#" onclick="doSomething(<?=$post_id?>);">Report Abuse</a></div>
     <script language="JavaScript"> 
         var clip = new ZeroClipboard.Client(),  
             myTextToCopy = '<?=$bitly?>';                    
@@ -189,14 +194,7 @@ function doSomething() {
             clip.setText( myTextToCopy );
         }
     </script>
-   <script language="JavaScript"> 
-     function report($pid){
-     var pid = <?=$post_id;?>;
-      var url = report.php?p=pid
-      echo
-     }
-   </script>
-             <br><br>
+             <br>
                 <?php
                   $share = $config['site_url']; 
                   $share .= "/";  

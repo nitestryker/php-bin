@@ -2,35 +2,24 @@
 
 phpbin is a PHP-based web application that allows you to store text online for a set period of time.
 
+view  the project page / bug tracker [Here](https://www.hostedredmine.com/projects/phpbin/) 
 
 [![Build Status](https://travis-ci.org/jeremystevens/php-bin.svg?branch=master)](https://travis-ci.org/jeremystevens/php-bin)
 ### Features:
 
 1. Store text online for a set period of time
-2. Syntax highlighting
-3. Line numbers for debugging purposes 
+2. GeSHi for syntax highlighting
+3. line numbers for debugging purposes 
 4. Download to File 
-5. Share on Social Media 
-6. Easy Print feature
-7. Search by Name / Syntax 
-8. Cron-job to prune expired post. 
-
-### Requirements
-#### PHP <= 5.4 
-Later  versions PHP will be supported in future releases
-#### MySQL >= 5.0
+5. Share link on facebook and twitter
+6. User registration / Profile 
+7. Visibility Options Public/ Private / Unlisted  
+8. Live recent post sidebar 
+9. Cron-job to prune expired post. 
 
 ### Current Version V1.0.7
 
-[CHANGELOG] (https://github.com/jeremystevens/php-bin/wiki/CHANGELOG)
-
-[ROADMAP] (http://bt.jeremystevens.org/roadmap_page.php) 
-
-please report all bugs [here] (http://bt.jeremystevens.org)
-
-or via email: [bugs@jeremystevens.org] (mailto:bugs@jeremystevens.org)
-
-Please feel free to also ask question on the [Knowledge Base] (http://kb.jeremystevens.org/index.php?action=show&cat=1)
+For the current CHANGELOG please visit [CHANGELOG] (https://github.com/jeremystevens/php-bin/wiki/CHANGELOG)
 
 installation instructions
 ======
