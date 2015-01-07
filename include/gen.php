@@ -26,6 +26,7 @@ mysql_query("CREATE TABLE IF NOT EXISTS `userp_$uid` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `postid` varchar(255) NOT NULL,
   `posters_name` varchar(255) NOT NULL,
+  `ip` varchar(255) NOT NULL,
   `post_title` varchar(255) NOT NULL,
   `post_syntax` varchar(255) NOT NULL,
   `exp_int` int(255) NOT NULL,
