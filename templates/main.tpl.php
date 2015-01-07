@@ -16,10 +16,10 @@
 # along with php-bin.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * @package php-bin
- * @copyright Copyright (C) 2013 - 2014  Jeremy Stevens - jeremiahstevens@gmail.com
- * @copyright Copyright (C) 2013 - 2014  Nitestryker - nitestryker@gmail.com 
- * @copyright Copyight  (c) 2013 - 2014  Nitestryker Software Inc. 
- * @link http://www.nswebdev.com
+ * @copyright Copyright (C) 2013 - 2015  Jeremy Stevens - jeremiahstevens@gmail.com
+ * @copyright Copyright (C) 2013 - 2015  Nitestryker - nitestryker@gmail.com 
+ * @copyright Copyight  (c) 2013 - 2015  Nitestryker Software Inc. 
+ * @link http://jeremystevens.org
 */
 
 error_reporting(0);

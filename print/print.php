@@ -31,18 +31,16 @@ $(document).ready(function(){
   </body>
 </html>
 <?php
-/*
-+------------------------------------------------
-|    print.php 
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+/**
+ * print.php (easy print post)
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 ob_start();
 error_reporting(E_ALL);
 

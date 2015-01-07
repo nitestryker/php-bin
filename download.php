@@ -1,4 +1,14 @@
 <?php
+/**
+ * download.php (download to text file)
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+*/
 error_reporting(E_ALL);
 // get the post id 
 $postid = $_GET['pid'];

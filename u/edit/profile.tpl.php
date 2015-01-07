@@ -1,16 +1,14 @@
 <?php
-/*
-+------------------------------------------------
-|    profile.tpl.php (users profile template)
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+/**
+ * profile.tpl.php (user profile template)
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 require_once '../../include/config.php';
 $profile = $_GET['usr'];
 // if user is not logged in show login form at the top
