@@ -1,14 +1,29 @@
 <?php
-/**
- * profile.tpl.php
- *
- * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
- */
+
+/*
+
++------------------------------------------------
+
+|    profile.tpl.php (users profile template)
+
+|   =============================================
+
+|    by Nitestryker
+
+|   (c) 2013 Nitestryker Software
+
+|   http://nitestryker.net
+
+|   =============================================
+
+|   git: https://github.com/nitestryker/phpbin.git
+
+|   Licence Info: GPL
+
++------------------------------------------------
+
+*/
+
 include '../include/config.php';
 
 $profile = $_GET['usr'];
@@ -21,7 +36,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
 
     $user = $_SESSION['username'];
 
-    $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
+    $form = "Welcome <a href='../u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
 
     $form .= "<a href='../logout.php'>logout</a>";
 
