@@ -19,7 +19,7 @@ view  the project page / bug tracker [Here](https://www.hostedredmine.com/projec
 
 ### Requirements:
 
-- PHP >= 5.4
+- PHP <= 5.4
 - Mysql >= 5.0
 - Cron-Job or Scheduled Task 
 
