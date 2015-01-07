@@ -32,7 +32,7 @@ date_default_timezone_set('America/Los_Angeles');
 /* Universal Variables 
 -------------------------------------------------------*/
 $config['app_name'] = "phpbin"; // do not edit this 
-$config['app_version'] = "1.0.4 "; // do no edit this\
+$config['app_version'] = "1.0.8 "; // do no edit this\
 
 $config['site_name'] = "phpbin"; // change the title to whatever your want
 
