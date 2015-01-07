@@ -15,7 +15,7 @@ session_start();
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $uid = $_SESSION['uid'];
     $user = $_SESSION['username'];
-    $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
+    $form = "Welcome <a href='../u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
     $form .= "<a href='logout.php'>logout</a>";
     $uname = $_SESSION['username'];  
 } else {
