@@ -1,16 +1,14 @@
 <?php
 /*
-+------------------------------------------------
-|    gen.php (generates a table for users post)
-|   =============================================
-|    by nitestryker
-|   (c) 2013 nswebdev.com
-|   http://www.nswebdev.com
-|   =============================================
-|   git: https://gitlab.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+ *   gen.php (generates a table for users post)
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 
 // required files
 require 'include/config.php';

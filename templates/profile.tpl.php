@@ -1,30 +1,15 @@
 <?php
-
-/*
-
-+------------------------------------------------
-
-|    profile.tpl.php (users profile template)
-
-|   =============================================
-
-|    by Nitestryker
-
-|   (c) 2013 Nitestryker Software
-
-|   http://nitestryker.net
-
-|   =============================================
-
-|   git: https://github.com/nitestryker/phpbin.git
-
-|   Licence Info: GPL
-
-+------------------------------------------------
-
-*/
-
-require_once '../include/config.php';
+/**
+ * profile.tpl.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
+include '../include/config.php';
 
 $profile = $_GET['usr'];
 
@@ -72,7 +57,7 @@ if (isset($_POST['submit'])) {
 
     $location = $_SERVER['HTTP_REFERER'];
 
- header('Refresh:1; url=index.php');
+ header('Refresh:1; url=$location');
 
 }
 
@@ -203,8 +188,8 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
 
             </a>
-
-            <a class="brand" href="/">Pastebin Clone</a>
+            
+            <a class="brand" href="/"></a>
 
 
 
@@ -224,7 +209,7 @@ if (isset($_POST['submit'])) {
 
                 <!---- login form here---->
 
-                <form class="navbar-form pull-right" action="../../index.php" method="post"/>
+                <form class="navbar-form pull-right" action="../index.php" method="post"/>
 
                 <?=$form;?></form>
 

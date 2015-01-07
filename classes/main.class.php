@@ -1,16 +1,14 @@
 <?php
-/*
-+------------------------------------------------
-|    main.class.php
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+/**
+ * main.class.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 
 class main
 {
@@ -55,13 +53,13 @@ function redirect()
     }
 function report($post = null) 
  {
- 	$postid = $postid;
+    $post = $post;
     include 'include/config.php';
     $site = $config['site_url'];
     $email = $config['site_admin_email'];
    $to = $email;
-   $subject = "post #$postid was reported";
-   $message = "post #$postid was reported as a violation";
+   $subject = "post #$post was reported";
+   $message = "post #$post was reported as a violation";
    $from = "abuse@$site";
    $headers = "From: $from";
    mail($to,$subject,$message,$headers);

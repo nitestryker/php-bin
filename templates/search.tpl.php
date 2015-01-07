@@ -1,16 +1,15 @@
 <?php
-/*
-+------------------------------------------------
-|    search.tpl.php
-|   =============================================
-|    by nitestryker
-|   (c) 2013 nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git:
-|   Licence Info: GPL
- +------------------------------------------------
-*/
+/**
+ * search.tpl.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
+ 
 // display results;
 include 'include/config.php';
 
@@ -94,7 +93,7 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="/">Pastebin Clone</a>
+            <a class="brand" href="/"><?=$config['site_name'];?></a>
 
             <div class="nav-collapse collapse">
 
@@ -160,6 +159,7 @@ if (isset($_POST['submit'])) {
                         <tr id="archive" bgcolor="">
                             <td nowrap width="35" id=""><span class="whitetext_md"><B>Name / Title</B><hr></td>
                             <td nowrap width="35"><span class="whitetext_md"><b>Posted</b><Hr></span></td>
+                            <td nowrap width="25"><span class="whitetext_md"><b>Total Hits</b><Hr></span></td>
                             <td nowrap width="35"><span class="whitetext_md"><b>Syntax</b><hr></span></td>
                         <tr> <?include 'classes/search.class.php'; $search = new searcher(); $search->searchbyname();?>
                             <?

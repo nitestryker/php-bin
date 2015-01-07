@@ -1,18 +1,16 @@
 <?php
-/*
-+------------------------------------------------
-|    archive.template.php
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+/**
+ * archive.template.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 
-require_once 'include/config.php';
+include_once ('include/config.php');
 session_start();
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $uid = $_SESSION['uid'];
@@ -29,8 +27,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $form .= "<ul class='nav pull-right'>";
     $form .= "<li><a href='register.php'>Registration</a></li>";
 }
-include_once 'include/config.php';
-include_once 'classes/conn.class.php';
+include_once ('include/config.php');
+include_once ('classes/conn.class.php');
 if (isset($_POST['submit'])) {
     $cmd = new Conn();
     $cmd->login($_POST['username'], $_POST['password']);
@@ -42,7 +40,7 @@ if (isset($_POST['submit'])) {
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?=$config['site_name'];?></title>
+    <title><?php echo $config['site_name'];?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="rien">
     <meta name="keywords" content="rien"/>
@@ -59,12 +57,6 @@ if (isset($_POST['submit'])) {
     <![endif]-->
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script>
-        function textAreaAdjust(o) {
-            o.style.height = "1px";
-            o.style.height = (25 + o.scrollHeight) + "px";
-        }
-    </script>
 </head>
 
 <body>
@@ -77,7 +69,7 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <a class="brand" href="/"><?=$config['site_name'];?></a>
+            <a class="brand" href="/"><?php echo $config['site_name'];?></a>
 
             <div class="nav-collapse collapse">
 
@@ -125,7 +117,7 @@ if (isset($_POST['submit'])) {
 
                     <!--Recent Post go here -->
                     <li>
-                        <? include 'include/live.php';?>
+                        <?php include 'include/live.php';?>
                     </li>
                 </ul>
             </div>
@@ -145,9 +137,10 @@ if (isset($_POST['submit'])) {
                         <tr id="archive" bgcolor="">
                             <td nowrap width="25" id=""><span class="whitetext_md"><B>Name / Title</B><hr></td>
                             <td nowrap width="25"><span class="whitetext_md"><b>Posted</b><Hr></span></td>
+                            <td nowrap width="25"><span class="whitetext_md"><b>Total Hits</b><Hr></span></td>
                             <td nowrap width="25"><span class="whitetext_md"><b>Syntax</b><hr></span></td>
                         </tr>
-                        <?
+                        <?php
                         //include needed files
                         include_once 'include/config.php';
                         include_once 'classes/archive.class.php';
@@ -185,10 +178,7 @@ if (isset($_POST['submit'])) {
 
 
         <footer class="span8">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pastebin
-            Clone - developed by <a href="http://nswebdev.com" target="_BLANK">Nitestryker Software</A></p>
+            
         </footer>
 
     </div>

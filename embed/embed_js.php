@@ -1,6 +1,6 @@
 <?php
 /**
- * raw.php (raw post)
+ * embed_js.php
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
@@ -9,7 +9,8 @@
  *
  * @version 1.0.8
  */
- 
+error_reporting(E_ALL);
+
 $rid = $_GET['rid'];
 if ($rid == "") {
     redirect();
@@ -29,21 +30,30 @@ $sql = "SELECT * FROM public_post WHERE postid = $rid";
 $result = mysql_query($sql);
 while ($row = mysql_fetch_array($result)) {
     $post_text = $row['post_text'];
-
+    $post_syntax = $row['post_syntax'];
 }
 if ($post_text == "") {
     echo "Sorry &nbsp;<b>$rid</b> was not found, Please try again";
     exit();
 }
 include_once '../include/geshi.php';
-$syntax = "text";
+$syntax = $post_syntax;
 $geshi = new GeSHi($post_text, $syntax);
-echo $geshi->parse_code();
+$embed = $geshi->parse_code();
 mysql_close($connection);
-function redirect()
-{
-    header('refresh:0; url=index.php');
-    include 'index.php';
-}
-
 ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=windows-1250">
+  <meta name="generator" content="PSPad editor, www.pspad.com">
+  <title></title>
+  </head>
+ <body>
+<p id="output"></p>
+  <script language="JavaScript"> 
+ var myvar = <?php echo json_encode($embed); ?>;
+document.getElementById("output").innerHTML = myvar
+</script>
+  </body>
+</html>

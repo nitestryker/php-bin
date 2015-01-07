@@ -1,16 +1,14 @@
 <?php
-/*
-+------------------------------------------------
-|    search.class.php
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+/**
+ * search.class.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 error_reporting(0);
 class searcher
 {
@@ -40,6 +38,8 @@ class searcher
             $post_title = $row['post_title'];
             $post_syntax = $row['post_syntax'];
             $post_date = $row['post_date'];
+             $post_hits = $row['post_hits'];
+
         }
 
         // if not results are found display error otherwize display results
@@ -54,6 +54,7 @@ class searcher
             $post_date = $this->time_since($my_time);
             $pd = "$post_date ago<hr></td>";
             echo $pd;
+            echo "<td>$post_hits<hr></td>";
             echo "<td>$post_syntax<hr></td>";
             echo "</tr>";
         }
@@ -95,7 +96,7 @@ class searcher
             $post_title = $row['post_title'];
             $post_syntax = $row['post_syntax'];
             $post_date = $row['post_date'];
-         
+            $post_hits = $row['post_hits'];
 
         // if not results are found display error otherwize display results
         if (empty($post_title)) {
@@ -109,6 +110,7 @@ class searcher
             $post_date = $this->time_since($my_time);
             $pd = "$post_date ago<hr></td>";
             echo $pd;
+            echo "<td>$post_hits<hr></td>";
             echo "<td>$post_syntax<hr></td>";
             echo "</tr>";
         }

@@ -1,20 +1,15 @@
 <?php
-/*
-+------------------------------------------------
-|    error.php
-|   =============================================
-|    by Nitestryker
-|   (c) 2013 Nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git: https://github.com/nitestryker/phpbin.git
-|   Licence Info: GPL
-+------------------------------------------------
-*
-*  When an error occurs this file will be displayed
-*
-*
-*
+/**
+ * error.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ *
+*  When an error occurs such as a 404 this file will be displayed 
 */
 error_reporting(0);
 include 'include/config.php';

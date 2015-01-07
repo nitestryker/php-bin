@@ -1,6 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=windows-1250">
+  <meta name="generator" content="PSPad editor, www.pspad.com">
+  <title></title>
+   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script>
+var doPrintPage;
+
+function printPage(){
+    window.print();
+    // this does not work for Chrom Version 34.0.1847.116 
+    window.onfocus=function(){ window.close();}
+}
+
+$(document).ready(function(){
+    $('input').blur(function(){
+        //3sec after the user leaves the input, printPage will fire
+        doPrintPage = setTimeout('printPage();', 3000);
+    });
+    $('input').focus(function(){
+        //But if another input gains focus printPage won't fire
+        clearTimeout(doPrintPage);
+    });
+});
+</script>
+  </head>
+ <body onload="printPage()">
+
+  </body>
+</html>
 <?php
 /**
- * raw.php (raw post)
+ * print.php (easy print post)
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
@@ -9,7 +41,9 @@
  *
  * @version 1.0.8
  */
- 
+ob_start();
+error_reporting(E_ALL);
+
 $rid = $_GET['rid'];
 if ($rid == "") {
     redirect();

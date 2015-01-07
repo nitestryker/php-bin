@@ -1,16 +1,14 @@
 <?php
-/*
-+------------------------------------------------
-|    submit.php
-|   =============================================
-|    by nitestryker
-|   (c) 2013 nitestryker Software
-|   http://nitestryker.net
-|   =============================================
-|   git:
-|   Licence Info: GPL
-+------------------------------------------------
-*/
+/**
+ * submit.php
+ *
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2015 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ *
+ * @version 1.0.8
+ */
 error_reporting(0);
 include_once '../../include/config.php';
 session_start();
