@@ -17,7 +17,45 @@ view  the project page / bug tracker [Here](https://www.hostedredmine.com/projec
 8. Live recent post sidebar 
 9. Cron-job to prune expired post. 
 
-### Current Version V1.0.7
+### Requirements:
+
+- PHP >= 5.4
+- Mysql >= 5.0
+- Cron-Job or Scheduled Task 
+
+#### Work around 
+
+if you hosting service does not offer cron-jobs / scheduled tasks you can still prune post, 
+just not as effectively as running a cronjob, you do this  by including the cronjob script on different pages
+when a user hits the page it will run the cronjob script and prune necessary post.
+
+the script is located in /include/cronjob.php  
+
+ex. add   include('include/cronjob.php');    on several pages
+
+### Bug Tracker / Reporting Bugs 
+
+Please feel free to report any bugs you find so I can fix them,
+either by submitting them directly on my [bug tracker] (http://bt.jeremystevens.org)
+or via email at [bugs@jeremystevens.org](mailto:bugs@jeremystevens.org)
+
+please make sure to be as detailed as possible and if possible send screenshots.
+
+### Support 
+
+some of your questions maybe already answered in my [knowlege base] (http://kb.jeremystevens.org)
+or if you have a solution or a work around to a problem please submit it.
+ 
+ 
+Couldn't figure something out and didn't find the answer in the knowledge base then please submit a ticket on 
+my [support page] (http://support.jeremystevens.org) and i will help you as soon as possible 
+
+or you can email me your question at [support@jeremystevens.org](mailto:jeremystevens@gmail.com)
+
+please make sure to be as detailed as possible and if possible send screenshots.
+
+
+### Current Version V1.0.8
 
 For the current CHANGELOG please visit [CHANGELOG] (https://github.com/jeremystevens/php-bin/wiki/CHANGELOG)
 
