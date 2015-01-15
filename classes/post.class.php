@@ -33,6 +33,10 @@ class post
 
         $sql = "SELECT * FROM public_post WHERE postid = $postid";
         $result = mysql_query($sql);
+       // prevent mysql_fetch_array warning 
+       if($result === FALSE) { 
+         exit(); // TODO: better error handling
+       }
         while ($row = mysql_fetch_array($result)) {
             $id = $row['public_postid'];
             $_SESSION['id'] = $id;
