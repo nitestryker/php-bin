@@ -44,7 +44,7 @@ if not args.expire:
 if args.exposure:
 	exposure = args.exposure.strip()
 if not args.exposure:
-	# if not set ten set the deafault to "public"
+	# if not set then set the default to "public"
 	exposure = "Public"
   
 #payload
