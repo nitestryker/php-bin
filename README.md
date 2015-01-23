@@ -2,8 +2,6 @@
 
 phpbin is a PHP-based web application that allows you to store text online for a set period of time.
 
-view  the project page / bug tracker [Here](https://www.hostedredmine.com/projects/phpbin/) 
-
 [![Build Status](https://travis-ci.org/jeremystevens/php-bin.svg?branch=master)](https://travis-ci.org/jeremystevens/php-bin)
 ### Features:
 
