@@ -75,7 +75,7 @@ if (isset($_POST['submit'])) {
 
                 <ul class="nav">
                     <li><a href="index.php">Add a new paste</a></li>
-                    <li><a href="archive.php">View all pastes</a></li>
+                    <li><a href="../archive.php">View all pastes</a></li>
 
                 </ul>
                 <!---- login form here---->
