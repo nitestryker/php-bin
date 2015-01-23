@@ -22,17 +22,7 @@ view  the project page / bug tracker [Here](https://www.hostedredmine.com/projec
 - PHP <= 5.4
 - Mysql >= 5.0
 - Cron-Job or Scheduled Task
- 
-### phpbin tools requirements 
 
-#### Linux 
-  (phpbin.py)  
-  required modules
-   - request 
-   - argparse
-   
- pip install request
- pip install argparse
 #### Work around 
 
 if you hosting service does not offer cron-jobs / scheduled tasks you can still prune post, 
