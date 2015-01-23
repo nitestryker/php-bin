@@ -14,7 +14,7 @@ __status__ = 'Development'
 parser = argparse.ArgumentParser(description='phpbinit',usage='%(prog)s [-insex]')
 parser.add_argument('-i','--input', help='Input file name',required=False)
 parser.add_argument('-n','--name', help='paste name', required=False)
-parser.add_argument('-s','--syntax', help='paste name', required=False)
+parser.add_argument('-s','--syntax', help='paste syntax', required=False)
 parser.add_argument('-e','--expire', help='paste expire', required=False)
 parser.add_argument('-x','--exposure', help='paste exposure', required=False)
 args = parser.parse_args()
