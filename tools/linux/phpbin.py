@@ -46,15 +46,11 @@ if args.exposure:
 if not args.exposure:
 	# if not set ten set the deafault to "public"
 	exposure = "Public"
-print(name)
-print(syntax)
-print(expire)
-print(exposure)
-print(str)
+  
 #payload
 payload = {'name': name, 'syntax': syntax, 'expi': expire, 'expo': exposure, 'text': str}
 # webrequest 
-r = requests.post("http://jeremystevens.org/pb/api/wpb.php", data=payload)
+r = requests.post("http://yourdomain.com/pb/api/pb_api.php", data=payload)
 status = r.status_code
 if status == 200:
 	print "successful"
