@@ -17,17 +17,20 @@ $proid = $_GET['usr'];
 
 // edit profile
     $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
-if ($action == "edit") {
+   // TODO add code to prevent SQL injection.
+   $action = clean($action); 
+
+    // clean action     
+   if ($action == "edit") {
 
     // verify that the logged in user is the same as the profile user
     $verify = $_SESSION['verify'];
-    if ($verify === $proid) {
-        $dtest = "works";
-        header("refresh:0; url=edit/$proid");
+    if ($verify == $proid) {
+    header("refresh:0; url=edit/$proid");
     }else {
-
         // if not verified redirect
         header("refresh:0; url=$proid");
+      exit();
     }
 }
 
@@ -101,6 +104,15 @@ if (empty($thits)) {
 } else {
     $thits = $thits;
 }
+
+ function clean($var = null)
+    {
+        // sanitation
+        $var = htmlspecialchars($var);
+        $var = trim(htmlspecialchars($var, ENT_QUOTES, "utf-8"));
+        $var = strip_tags($var);
+        return $var;
+    }
 
 //test 2
 $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")

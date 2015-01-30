@@ -334,7 +334,7 @@ if (isset($_POST['submit'])) {
 
                 <div class="edit"
 
-                     style='position:absolute;left:1140px;top:10px;width:582px;height:48px;z-index:36;padding:0;'><?=$edit;?></div>
+                     style='position:absolute;left:830px;top:10px;width:582px;height:48px;z-index:36;padding:0;'><?=$edit;?></div>
 
                 <div class="info"
 
