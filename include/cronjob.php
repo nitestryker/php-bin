@@ -41,11 +41,6 @@ if ($expire_time < $today_time) {
 $sql = "DELETE FROM `public_post` WHERE `postid` = $postid";
 $result = mysql_query($sql);
    
-        $date = date('Y-m-d H:i:s');
-        echo "Cron Job run on:  $date";
-     // delete expired post in reg users bin
-  echo "<Br>";
-  
   // if expired post by reg user delete it from personal bin 
    if ($posters_name != "guest"){
    	// get uid from username
