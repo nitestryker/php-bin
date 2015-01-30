@@ -47,7 +47,7 @@ $result = mysql_query($sql);
   echo "<Br>";
   
   // if expired post by reg user delete it from personal bin 
-   if ($posters_name <> "guest"){
+   if ($posters_name != "guest"){
    	// get uid from username
 $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
      or die ("Couldn't connect to server.");
