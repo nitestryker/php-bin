@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.0.8  (Jan 03, 2015)
+### V1.0.8  (Jan 03, 2015)
    
     # Fixed cron-job script to prune registered users paste
     # Fixed Broken Link from archive page 
