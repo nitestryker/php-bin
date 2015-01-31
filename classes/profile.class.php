@@ -119,6 +119,7 @@ class profile
         $result = mysql_query($sql);
         while ($row = mysql_fetch_array($result)) {
             $getpid = $row['postid'];
+            $posters_name = $row['posters_name'];
             $gettitle = $row['post_title'];
             $my_time = strtotime($row['post_date']);
             $postdate = $this->time_since($my_time);
@@ -163,15 +164,22 @@ class profile
             } else {
                 $gethits = $gethits;
             }
-
+           
+            // if user is the page owner allow them to edit paste.
+            if ($verify == $posters_name){
+              $editpost = "<a href='$posters_name&action=editpost&postid=$getpid'  title='Edit Paste' style='background-color:#FFFFFF;color:#000000;text-decoration:none'><img src='../img/edit.png' height='20' width='20'></a>";
+              $delpost = "<a href='$posters_name&action=delpost&postid=$getpid'  title='Delete Paste' style='background-color:#FFFFFF;color:#000000;text-decoration:none'><img src='../img/del.png' height='15' width='15'></a>";
+              } else { 
+              $editpost = "";
+             }  
             $getsyntax = $row['post_syntax'];
             include 'include/config.php';
             $folder = $config['site_index'];
-            echo "<td>$img &nbsp; <a href='/$folder/$getpid'$style;>$gettitle</a><hr></td>";
-            echo "<td>&nbsp;&nbsp;&nbsp;$postdate ago <hr></td>";
-            echo "<td>$expires<hr></td>";
-            echo "<td>$gethits<hr></td>";
-            echo "<td>$getsyntax<hr></td>";
+            echo "<td align='justify'>$img &nbsp; <a href='/$folder/$getpid'$style;>$gettitle</a>&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; $editpost &nbsp;  $delpost<hr></td>";
+            echo "<td align='justify'>&nbsp;&nbsp;&nbsp;$postdate ago <br> <hr></td>";
+            echo "<td align='justify'>$expires<hr></td>";
+            echo "<td align='justify'>$gethits<hr></td>";
+            echo "<td align='justify'>$getsyntax<hr></td>";
             echo "</tr>";
         }
         echo "</table>";

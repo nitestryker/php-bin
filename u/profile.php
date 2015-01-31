@@ -20,7 +20,7 @@ $proid = $_GET['usr'];
    // TODO add code to prevent SQL injection.
    $action = clean($action); 
 
-    // clean action     
+    // verify user and then allow to edit profile      
    if ($action == "edit") {
 
     // verify that the logged in user is the same as the profile user
@@ -32,6 +32,21 @@ $proid = $_GET['usr'];
         header("refresh:0; url=$proid");
       exit();
     }
+}
+  // action edit paste
+  if($action == "editpost") {
+  $verify = $_SESSION['verify'];
+   $post = $_GET['postid'];
+
+ // verify user is who they say they are 
+  if ($verify == $proid) {
+    header("refresh:0; url=editpost/$post");
+    }else {
+        // if not verified redirect
+        header("refresh:0; url=$proid");
+      exit();
+    }
+
 }
 
 
