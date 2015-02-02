@@ -61,7 +61,7 @@ $db = mysql_select_db("$database_name", $connection)
 
 // new instance
 $profile = new profile($proid);
-
+$_SESSION['profile_id'] = $proid;
 // variables from class
 $profieid = $profile->profileid;
 $r2 = $profile->profileid;
