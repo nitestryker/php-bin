@@ -7,14 +7,13 @@
  * @copyright Copyight  (c) 2013 - 2015  Nitestryker Software Inc. 
  * @link http://jeremystevens.org
 */
-session_start();
 error_reporting(0);
 require_once '../../include/config.php';
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $uid = $_SESSION['uid'];
     $user = $_SESSION['username'];
-    $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='logout.php'>logout</a>";
+    $form = "Welcome <a href='../../u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
+    $form .= "<a href='../../logout.php'>logout</a>";
     $uname = $_SESSION['username'];  
 } else {
     $form = "<input type='hidden' name='login'>";
