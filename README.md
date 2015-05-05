@@ -20,6 +20,11 @@ phpbin is a PHP-based web application that allows you to store text online for a
 - Mysql >= 5.0
 - Cron-Job or Scheduled Task
 
+### Known issues in V1.0.9
+
+1. Paste Archive when  number of paste exceed the page limit it starts are new     page. the paste on the next page will not appear this is a bug. and will be fixed soon.
+   
+
 #### Work around 
 
 if you hosting service does not offer cron-jobs / scheduled tasks you can still prune post, 
