@@ -1,5 +1,11 @@
 # Changelog
 
+### V1.0.9 (March 10th 2015)
+
+    # Various Bugs Fixed.
+    # Changed the Install Script /tools/linux/ now uses a python script and checks for dependencies before installing.
+    # Minor UI Issues fixed.
+
 ### V1.0.8  (Jan 03, 2015)
 
     # Fixed cron-job script to prune registered users paste
