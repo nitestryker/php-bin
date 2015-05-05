@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Php-bin : A PHP/ MySQL pastebin clone">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Php-bin</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/nitestryker/php-bin">View on GitHub</a>
+
+          <h1 id="project_title">Php-bin</h1>
+          <h2 id="project_tagline">A PHP/ MySQL pastebin clone</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/nitestryker/php-bin/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/nitestryker/php-bin/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>
+<a id="what-is-phpbin" class="anchor" href="#what-is-phpbin" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is phpbin?</h2>
+
+<p>phpbin is a PHP-based web application that allows you to store text online for a set period of time.</p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features:</h3>
+
+<ol>
+<li>Store text online for a set period of time</li>
+<li>Syntax highlighting</li>
+<li>Line numbers for debugging purposes </li>
+<li>Download to text File</li>
+<li>Share link on Social Media</li>
+<li>Quick Print<br>
+</li>
+<li>Report Abuse </li>
+<li>Live recent post sidebar </li>
+<li>Cron-job to prune expired post. </li>
+</ol>
+
+<h3>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements:</h3>
+
+<ul>
+<li>PHP &lt;= 5.4</li>
+<li>Mysql &gt;= 5.0</li>
+<li>Cron-Job or Scheduled Task</li>
+</ul>
+
+<h4>
+<a id="work-around" class="anchor" href="#work-around" aria-hidden="true"><span class="octicon octicon-link"></span></a>Work around</h4>
+
+<p>if you hosting service does not offer cron-jobs / scheduled tasks you can still prune post, 
+just not as effectively as running a cronjob, you do this  by including the cronjob script on different pages
+when a user hits the page it will run the cronjob script and prune necessary post.</p>
+
+<p>the script is located in /include/cronjob.php  </p>
+
+<p>ex. include('include/cronjob.php');    on several pages</p>
+
+<h3>
+<a id="bug-tracker--reporting-bugs" class="anchor" href="#bug-tracker--reporting-bugs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bug Tracker / Reporting Bugs</h3>
+
+<p>Please feel free to report any bugs you find so I can fix them,
+either by submitting them directly on my <a href="https://www.hostedredmine.com/projects/phpbin">bug tracker</a>
+or via email at <a href="mailto:nitestryker@gmail.com">nitestryker@gmail.com</a></p>
+
+<p>please make sure to be as detailed as possible and if possible send screenshots.</p>
+
+<h3>
+<a id="current-version-v108" class="anchor" href="#current-version-v108" aria-hidden="true"><span class="octicon octicon-link"></span></a>Current Version V1.0.8</h3>
+
+<p>For the current CHANGELOG please visit <a href="https://github.com/nitestryker/php-bin/wiki/CHANGELOG">CHANGELOG</a></p>
+
+<h1>
+<a id="installation-instructions" class="anchor" href="#installation-instructions" aria-hidden="true"><span class="octicon octicon-link"></span></a>installation instructions</h1>
+
+<ol>
+<li> create database install database tables located in (/install/sql) </li>
+<li> edit  /include/config.php </li>
+<li> edit .htaccess file<br>
+</li>
+</ol>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Php-bin maintained by <a href="https://github.com/nitestryker">nitestryker</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
