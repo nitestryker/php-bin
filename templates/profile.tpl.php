@@ -334,7 +334,7 @@ if (isset($_POST['submit'])) {
 
                 <div class="edit"
 
-                     style='position:absolute;left:1140px;top:10px;width:582px;height:48px;z-index:36;padding:0;'><?=$edit;?></div>
+                     style='position:absolute;left:830px;top:10px;width:582px;height:48px;z-index:36;padding:0;'><?=$edit;?></div>
 
                 <div class="info"
 
@@ -356,15 +356,15 @@ if (isset($_POST['submit'])) {
 
                 <br>
 
-                <table width="100%" Height="" id="archvie" border="0">
+                <table width="100%" Height="145" id="archvie" border="0">
 
                     <tr id="archive" bgcolor="">
 
-                        <td nowrap width="45" id=""><span class="whitetext_md"><B>&nbsp;Name / Title</B><hr></td>
+                        <td nowrap width="45"  id=""><span class="whitetext_md"><B>&nbsp;Name / Title</B><hr></td>
 
                         <td nowrap width="45"><span class="whitetext_md"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added</b><Hr></span></td>
 
-                        <td nowrap width="45"><span class="whitetext_md"><b>Expires</b><hr></span></td>
+                        <td nowrap width="45" ><span class="whitetext_md"><b>Expires</b><hr></span></td>
 
                         <td nowrap width="45"><span class="whitetext_md"><b>Hits</b><hr></span></td>
 

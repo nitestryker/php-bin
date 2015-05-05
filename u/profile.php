@@ -17,18 +17,36 @@ $proid = $_GET['usr'];
 
 // edit profile
     $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
-if ($action == "edit") {
+   // TODO add code to prevent SQL injection.
+   $action = clean($action); 
+
+    // verify user and then allow to edit profile      
+   if ($action == "edit") {
 
     // verify that the logged in user is the same as the profile user
     $verify = $_SESSION['verify'];
-    if ($verify === $proid) {
-        $dtest = "works";
-        header("refresh:0; url=edit/$proid");
+    if ($verify == $proid) {
+    header("refresh:0; url=edit/$proid");
     }else {
-
         // if not verified redirect
         header("refresh:0; url=$proid");
+      exit();
     }
+}
+  // action edit paste
+  if($action == "editpost") {
+  $verify = $_SESSION['verify'];
+   $post = $_GET['postid'];
+
+ // verify user is who they say they are 
+  if ($verify == $proid) {
+    header("refresh:0; url=editpost/$post");
+    }else {
+        // if not verified redirect
+        header("refresh:0; url=$proid");
+      exit();
+    }
+
 }
 
 
@@ -43,7 +61,7 @@ $db = mysql_select_db("$database_name", $connection)
 
 // new instance
 $profile = new profile($proid);
-
+$_SESSION['profile_id'] = $proid;
 // variables from class
 $profieid = $profile->profileid;
 $r2 = $profile->profileid;
@@ -101,6 +119,15 @@ if (empty($thits)) {
 } else {
     $thits = $thits;
 }
+
+ function clean($var = null)
+    {
+        // sanitation
+        $var = htmlspecialchars($var);
+        $var = trim(htmlspecialchars($var, ENT_QUOTES, "utf-8"));
+        $var = strip_tags($var);
+        return $var;
+    }
 
 //test 2
 $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")

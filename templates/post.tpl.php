@@ -11,6 +11,7 @@
  */
  
 session_start();
+error_reporting(0);
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $uid = $_SESSION['uid'];
     $user = $_SESSION['username'];
@@ -26,6 +27,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $form .= "<ul class='nav pull-right'>";
     $form .= "<li><a href='register.php'>Registration</a></li>";
 }
+// if paste owner let them edit / delete paste directly 
+if ($user == $posters_name){
+  $editpaste = "|  <a href='u/$posters_name&action=editpost&postid=$pid'>Edit</a>  |";
+  $delpaste = "Delete </a> |"; 
+} else {
+$editpaste = null;
+} 
 include_once 'include/config.php';
 include_once 'classes/conn.class.php';
 include_once 'include/cronjob.php';
@@ -173,6 +181,19 @@ function doSomething() {
     return false;
 }
 </script>
+</script>
+ <script type="text/javascript">
+function deletepaste() {
+     var answer = confirm ("Are you sure you want to delete the paste? it can not be recovered") ;
+     if(answer){
+     var id =<?=$pid?>;
+     $.get('delete.php?pid='+id+'');
+    window.location.href = "index.php";
+    return false;
+    }
+    
+}
+</script>
 
                 <div class="title">#<?=$post_id;?></div>
                 <img src="<?=$imagesrc;?>" height=50 width=50>
@@ -183,7 +204,7 @@ function doSomething() {
                 By: <?=$namelink;?> on <?=$fdate;?> | Syntax: <a
                 href="archive/<?=$post_syntax;?>"><?=$post_syntax;?></a> | Size: <?=$post_size?> KB |
                 Hits: <?=$post_hits?>  | Expires: <?=$expires;?> |<Br>
-                <div id="options" style="position:relative;left:86px;top:21%;width:100%;"><a href="raw/<?=$post_id;?>" target="popupwindow">Raw Code</a> |<?=$link_title;?>&nbsp;<?=$bitly;?>| <a href="download.php?pid=<?=$post_id?>" target="popupwindow"> Download </a> | <a href="print/<?=$post_id?>" target="popupwindow"> Print </a> | &nbsp;<a href="#" onclick="doSomething(<?=$post_id?>);">Report Abuse</a></div>
+                <div id="options" style="position:relative;left:86px;top:21%;width:100%;"><a href="raw/<?=$post_id;?>" target="popupwindow">Raw Code</a> |<?=$link_title;?>&nbsp;<?=$bitly;?>| <a href="download.php?pid=<?=$post_id?>" target="popupwindow"> Download </a> | <a href="print/<?=$post_id?>" target="popupwindow"> Print </a> | &nbsp;<a href="#" onclick="doSomething(<?=$post_id?>);">Report Abuse</a> &nbsp;<?=$editpaste;?><a href="" onclick="deletepaste(<?=$post_id?>);"> <?=$delpaste;?></a></div>
     <script language="JavaScript"> 
         var clip = new ZeroClipboard.Client(),  
             myTextToCopy = '<?=$bitly?>';                    
