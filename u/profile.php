@@ -4,7 +4,9 @@
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @author Nitestryker 
+ * @copyright 2014-2015 Jeremy Stevens 
+ * @copyright 2015 Nitestryker 
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
  * @version 1.0.8
@@ -110,7 +112,17 @@ if ($website == "") {
     $website = "N/A";
 } else {
 
-    $website = "<a href='$website'>$website</a>";
+// vaidate the url address
+if (!filter_var($website, FILTER_VALIDATE_URL) === false) {
+    $address = $website;
+} else {
+    $address = "http://$website";
+}
+
+  // remove illegal characters from address 
+ $address = filter_var($address, FILTER_SANITIZE_URL);
+
+    $website = "<a href='$address'>$address</a>";
 }
 
 // if  total hit count is null then display 0

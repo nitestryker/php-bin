@@ -10,8 +10,30 @@
  * @version 1.0.8
  */
 
-include_once ('include/config.php');
-session_start();
+include '../include/error_handler.php';
+$time_start = microtime();
+
+ob_start();
+
+// check if error logging is turned on 
+if ($error_logging == 1){
+ 
+  // use custom error handler 
+ set_error_handler('error_handler');
+} 
+if ($display_errors == 1 ){
+	error_reporting(defined('E_STRICT') ? E_ALL | E_STRICT : E_ALL);
+}else {
+	
+// turn off error reporting 
+  error_reporting(0);
+}
+
+// check if session is already started PHP >= 5.4.0
+if(session_id() == '') {
+    session_start();
+}
+
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $uid = $_SESSION['uid'];
     $user = $_SESSION['username'];
@@ -27,8 +49,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     $form .= "<ul class='nav pull-right'>";
     $form .= "<li><a href='register.php'>Registration</a></li>";
 }
-include_once ('include/config.php');
-include_once ('classes/conn.class.php');
+//include_once ('../include/config.php');
+//include_once ('../classes/conn.class.php');
 if (isset($_POST['submit'])) {
     $cmd = new Conn();
     $cmd->login($_POST['username'], $_POST['password']);
@@ -103,7 +125,7 @@ if (isset($_POST['submit'])) {
         <div class="span2 offset1">
             <div class="base-block">
                 <div class="title">Paste Search</div>
-                <form class="form-search" name="form1" method="get" action="search.php">
+                <form class="form-search" name="form1" method="get" action="../search.php">
                     <div class="input-prepend">
 
                         <input type="text" name="term" class="span12">
