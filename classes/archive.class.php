@@ -3,13 +3,13 @@
  * archive.class.php
  *
  * @package PHP-Bin
+ * @auther Nitestryker
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
  * @version 1.0.8
  */
-error_reporting(0);
+
 class archive
 {
     function getarchive($page = null)
