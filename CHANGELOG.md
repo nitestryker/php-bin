@@ -1,5 +1,12 @@
 # Changelog
 
+### V1.0.9-R2 (Augst 20th 2015)
+    
+    # Removed Includes that were causing Warning Mesages. Fixed #4, #5, #6 , #7,
+    + added the missing file causing issue #8 
+       
+    
+    
 ### V1.0.9 (March 10th 2015)
 
     # Various Bugs Fixed.
