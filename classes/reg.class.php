@@ -3,12 +3,17 @@
  * reg.class.php
  *
  * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @author Nitestryker
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 1.1.0
+ *  
+ * V1.1.0 Changes   
+ *   Fixed issue #15 Buffer Output Error
+ *   fixed page duplication issue 
+ *    
  */
+ ob_start();
 class reg
 {
 
@@ -104,7 +109,9 @@ class reg
     function redirect()
     {
         header('refresh: 6; url=index.php');
-        include 'index.php';
+
+         /* removed this line because it was causing page duplication  */
+       // include 'index.php';
     }
 
     // generate random userid;
