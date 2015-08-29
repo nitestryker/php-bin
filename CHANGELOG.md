@@ -1,14 +1,14 @@
 # Changelog
 
-### V1.0.9-R2 (Augst 20th 2015)
+### V1.1.0 
+
+    + Added Random avatar for guest 
+    # Fixed Issue causing Header Warning 
+    # Fixed Fatal Error on failed registration
+    # Fixed off-centered registration error text
     
-    # Removed Includes that were causing Warning Mesages. Fixed #4, #5, #6 , #7,
-    + added the missing file causing issue #8 
-    ^ updated searcharchive.php to fix search issue #8
-    ^ Added URL Validatin to Profile to Fix the URL escaping Problem
-    ^ Other Various Security Updates.   
     
-    
+     
 ### V1.0.9 (March 10th 2015)
 
     # Various Bugs Fixed.
