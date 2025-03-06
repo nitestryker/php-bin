@@ -76,8 +76,10 @@ if (isset($_POST['login'])) {
         $('paste').rows = linecount + 1;
     };
 
-    Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
-    resizeIt(); //initial on load
+    document.addEventListener('DOMContentLoaded', function() {
+        resizeIt(); //initial on load
+    });
+
 </script>
 
 <div class="navbar navbar-fixed-top">
@@ -302,7 +304,7 @@ if (isset($_POST['login'])) {
 
 
 <footer class="span8">
-  
+
 </footer>
 
 </div> <!-- /container -->

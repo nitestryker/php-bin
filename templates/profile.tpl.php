@@ -85,8 +85,10 @@ if (isset($_POST['submit'])) {
 <head>
 
     <meta charset="utf-8">
-
-    <title><?=$config['site_name'];?></title>
+    <?php
+    $site_name = isset($config) && isset($config['site_name']) ? $config['site_name'] : 'Site Name'; //Handle potential null
+    ?>
+    <title><?=$site_name;?></title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -120,11 +122,10 @@ if (isset($_POST['submit'])) {
 
     <script type="text/javascript" src="js/bootstrap.js"></script>
 
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js"></script>
 
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 
     <script>
 
@@ -180,7 +181,10 @@ if (isset($_POST['submit'])) {
 
 
 
-    Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
+    //Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('paste').addEventListener('keyup', resizeIt);
+    });
 
     resizeIt(); //initial on load
 
@@ -203,7 +207,7 @@ if (isset($_POST['submit'])) {
                 <span class="icon-bar"></span>
 
             </a>
-            
+
             <a class="brand" href="/"></a>
 
 
@@ -328,17 +332,23 @@ if (isset($_POST['submit'])) {
 
                 &nbsp;&nbsp;&nbsp;&nbsp;
 
-                <i><b><font size="5"><?=$username;?>'s bin</font></b></i>
+                <i><b><font size="5"><?=$uname;?>'s bin</font></b></i>
 
 
 
                 <div class="edit"
 
                      style='position:absolute;left:830px;top:10px;width:582px;height:48px;z-index:36;padding:0;'><?=$edit;?></div>
-
+                <?php
+                $num_rows = isset($num_rows)? $num_rows : 0; // Handle potential null
+                $thits = isset($thits)? $thits : 0; // Handle potential null
+                $join_date = isset($join_date)? $join_date : ''; // Handle potential null
+                $location = isset($location)? $location : ''; // Handle potential null
+                $website = isset($website)? $website : ''; // Handle potential null
+                ?>
                 <div class="info"
 
-                     style='position:relative;left:100px;top:-10px;width:61 2px;height:48px;z-index:36;padding:0;'>Total
+                     style='position:relative;left:100px;top:-10px;width:612px;height:48px;z-index:36;padding:0;'>Total
 
                     Paste: <?=$num_rows;?> &nbsp; |&nbsp; Total Hits: <?=$thits;?> &nbsp; |&nbsp;
 
@@ -373,7 +383,7 @@ if (isset($_POST['submit'])) {
                     </tr>
 
                     <tr><?$userpost = new profile(); $userpost->userspost($profieid)?>
-      
+
 
                     </tr>
 
@@ -414,4 +424,3 @@ if (isset($_POST['submit'])) {
 </body>
 
 </html>
-

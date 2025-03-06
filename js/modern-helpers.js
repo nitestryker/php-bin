@@ -9,11 +9,13 @@
 // Document ready function compatible with modern jQuery
 jQuery(document).ready(function($) {
     // Initialize tooltips if Bootstrap is available
-    if (typeof $.fn.tooltip === 'function') {
-        $('[data-toggle="tooltip"]').tooltip();
-    } else {
-        console.log("Bootstrap tooltip function not available");
-    }
+    setTimeout(function() {
+        if (typeof $.fn.tooltip === 'function') {
+            $('[data-toggle="tooltip"]').tooltip();
+        } else {
+            console.log("Bootstrap tooltip function not available");
+        }
+    }, 500);
 
     // Handle text area auto-resize
     $('.auto-resize').on('input', function() {
