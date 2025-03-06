@@ -3,11 +3,14 @@
  * post.php
  *
  * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @author Nitestryker
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 1.1.0 
+ *  
+ *     V1.1.0 Changes 
+ *     added random  avatar rotation for guest users
+ *    
 */
 error_reporting(E_ALL);
 $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
@@ -82,7 +85,7 @@ $_SESSION['post_id'] = $post_id;
 
 $posters_name = $post->posters_name;
 if ($posters_name == "guest"){
-$imagesrc = "img/no.gif";	
+$imagesrc = "include/avatar.php?uimage=$posters_name";		
 }else {
 $imagesrc = "include/avatar.php?uimage=$posters_name";		
 }

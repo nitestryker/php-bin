@@ -9,6 +9,7 @@
  *
  * @version 1.0.8
  */
+ ob_start();
 class reg
 {
 
@@ -51,13 +52,18 @@ class reg
         $email_check = mysql_num_rows($sql_email_check);
 
         if (($email_check > 0)) {
-            echo "<div id='wb_Shape3' style='position:absolute;left:209px;top:57px;width:582px;height:48px;z-index:36;padding:0;'><font color=red>Please fix the following errors:</font> <br />";
+            echo "<div id='wb_Shape3' style='position:absolute;left:809px;top:57px;width:582px;height:48px;z-index:36;padding:0;'><font color=red>Please fix the following errors:</font> <br />";
             if ($email_check > 0) {
-                echo "<strong>Your email address has already been used by another member in our database. Please submit a different Email address!<br /></div>";
-                unset($email_address);
+               echo "<div id='wb_Shape3' style='position:absolute;left:00px;top:37px;width:582px;height:48px;z-index:36;padding:0;'><font color=red>Your email address has already been used by another member in our database. Please submit a different Email address!<br /></font> <br />";
+ 
+
+              unset($email_address);
             }
-            include 'register.php'; // Show the form again!
-            exit(); // exit the script so that we do not create this account
+            // show the form again.
+             $this->regError();       
+             // exit the script so that we do not create this account    
+             exit();
+  
         }
         $uid = $this->generateRandomString(9);
 
@@ -104,7 +110,15 @@ class reg
     function redirect()
     {
         header('refresh: 6; url=index.php');
-        include 'index.php';
+
+         /* removed this line */
+       // include 'index.php';
+    }
+    
+ function showagain()
+    {
+        header('refresh: 2; url=register.php');
+
     }
 
     // generate random userid;
