@@ -1,174 +1,199 @@
+
 <?php
 /**
- * search.class.php
+ * Search Class
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 2.0.0
  */
-error_reporting(0);
-class searcher
+
+class Search
 {
-    function searchbyname()
+    private $db;
+    private $config;
+    
+    /**
+     * Constructor
+     *
+     * @param mysqli $db Database connection
+     * @param array $config Configuration settings
+     */
+    public function __construct($db, $config)
     {
-        //include config
-        include 'include/config.php';
-
-        // make connection to database
-        $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-            or die ("Couldn't connect to server.");
-        $db = mysql_select_db("$database_name", $connection)
-            or die("Couldn't select database.");
-
-        // sanitize request
-        $term = mysql_real_escape_string($_REQUEST['term']);
-        $term = addslashes($term);
-        $term = strip_tags($term);
-        if ($term == "") {
-            echo "<tr><td><font size='6'><font color='red'>sorry no results found</font></td><tr>";
-            exit();
-        }
-        $sql = mysql_query("SELECT * FROM public_post WHERE post_title LIKE '%" . $term . "%' AND viewable = 1") or die
-        (mysql_error());
-        while ($row = mysql_fetch_array($sql)) {
-            $postid = $row['postid'];
-            $post_title = $row['post_title'];
-            $post_syntax = $row['post_syntax'];
-            $post_date = $row['post_date'];
-             $post_hits = $row['post_hits'];
-
-        }
-
-        // if not results are found display error otherwize display results
-        if (empty($post_title)) {
-            $this->error = "<td><font size='6'><font color='red'>sorry no results found</font></td><tr>";
-            $pd = null;
-        } else {
-            echo "<tr>";
-            echo  "<td><img src='http://icons.iconarchive.com/icons/semlabs/web-blog/48/post-remove-icon.png' height='18' width='18'>&nbsp;<a href='$postid'>$post_title</a><hr></td>";
-            echo "<td>";
-            $my_time = strtotime($post_date);
-            $post_date = $this->time_since($my_time);
-            $pd = "$post_date ago<hr></td>";
-            echo $pd;
-            echo "<td>$post_hits<hr></td>";
-            echo "<td>$post_syntax<hr></td>";
-            echo "</tr>";
-        }
-        if ($post_title == "") {
-            $this->error = "<td><font size='4'><font color='red'>sorry no results found</font></td><tr>";
-            $pd = null;
-        }
-
-    } // end of function
+        $this->db = $db;
+        $this->config = $config;
+    }
     
-    
-    
-     /* search for post 
-      */
-    
-     function searchbysyntax()
+    /**
+     * Search public posts
+     *
+     * @param string $query Search query
+     * @param int $limit Number of posts to return
+     * @return array Search results
+     */
+    public function searchPosts($query, $limit = 50)
     {
-        //include config
-        include '../include/config.php';
-
-        // make connection to database
-        $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-            or die ("Couldn't connect to server.");
-        $db = mysql_select_db("$database_name", $connection)
-            or die("Couldn't select database.");
-
-        // sanitize request
-        $term =$_GET['syntax'];
-        $term = addslashes($term);
-        $term = strip_tags($term);
-        if ($term == "") {
-            echo "<tr><td><font size='6'><font color='red'>sorry no results found</font></td><tr>";
-            exit();
+        $posts = [];
+        
+        if (empty($query)) {
+            return $posts;
         }
-        $sql = mysql_query("SELECT * FROM public_post WHERE post_syntax = '$term' ") or die
-        (mysql_error());
-        while ($row = mysql_fetch_array($sql)) {
-            $postid = $row['postid'];
-            $post_title = $row['post_title'];
-            $post_syntax = $row['post_syntax'];
-            $post_date = $row['post_date'];
-            $post_hits = $row['post_hits'];
-
-        // if not results are found display error otherwize display results
-        if (empty($post_title)) {
-            $this->error = "<td><font size='6'><font color='red'>sorry no results found</font></td><tr>";
-            $pd = null;
-        } else {
-            echo "<tr>";
-            echo  "<td><img src='http://icons.iconarchive.com/icons/semlabs/web-blog/48/post-remove-icon.png' height='18' width='18'>&nbsp;<a href='../$postid'>$post_title</a><hr></td>";
-            echo "<td>";
-            $my_time = strtotime($post_date);
-            $post_date = $this->time_since($my_time);
-            $pd = "$post_date ago<hr></td>";
-            echo $pd;
-            echo "<td>$post_hits<hr></td>";
-            echo "<td>$post_syntax<hr></td>";
-            echo "</tr>";
-        }
-        if ($post_title == "") {
-            $this->error = "<td><font size='4'><font color='red'>sorry no results found</font></td><tr>";
-            $pd = null;
-        }
-	}
-
-    } // end of function
-
-    // time since
-    function time_since($original)
-    {
-        // array of time period chunks
-        $chunks = array(
-            array(60 * 60 * 24 * 365, 'year'),
-            array(60 * 60 * 24 * 30, 'month'),
-            array(60 * 60 * 24 * 7, 'week'),
-            array(60 * 60 * 24, 'day'),
-            array(60 * 60, 'hour'),
-            array(60, 'minute'),
+        
+        $searchTerm = '%' . $this->db->real_escape_string($query) . '%';
+        
+        $stmt = $this->db->prepare(
+            "SELECT * FROM public_post 
+            WHERE (post_title LIKE ? OR post_text LIKE ?) 
+            AND viewable = 1 
+            ORDER BY post_date DESC 
+            LIMIT ?"
         );
-
-        $today = time(); /* Current unix time  */
-        $since = $today - $original;
-
-        // $j saves performing the count function each time around the loop
-        for ($i = 0, $j = count($chunks); $i < $j; $i++) {
-
-            $seconds = $chunks[$i][0];
-            $name = $chunks[$i][1];
-
-            // finding the biggest chunk (if the chunk fits, break)
-            if (($count = floor($since / $seconds)) != 0) {
-                // DEBUG print "<!-- It's $name -->\n";
-                break;
+        
+        $stmt->bind_param("ssi", $searchTerm, $searchTerm, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $posts[] = $row;
             }
         }
-
-
-        $print = ($count == 1) ? '1 ' . $name : "$count {$name}s";
-
-
-        // if ($i + 1 < $j) {
-        // now getting the second item
-        //  $seconds2 = $chunks[$i + 1][0];
-        //$name2 = $chunks[$i + 1][1];
-
-        // add second item if it's greater than 0
-        // if (($count2 = floor(($since - ($seconds * $count)) / $seconds2)) != 0) {
-        //  $print .= ($count2 == 1) ? ', 1 '.$name2 : ", $count2 {$name2}s";
-        //  }
-        //  }
-
-        return $print;
+        
+        $stmt->close();
+        
+        return $posts;
+    }
+    
+    /**
+     * Search posts by syntax
+     *
+     * @param string $syntax Syntax filter
+     * @param int $limit Number of posts to return
+     * @return array Filtered posts
+     */
+    public function searchBySyntax($syntax, $limit = 50)
+    {
+        $posts = [];
+        
+        if (empty($syntax)) {
+            return $posts;
+        }
+        
+        $stmt = $this->db->prepare(
+            "SELECT * FROM public_post 
+            WHERE post_syntax = ? 
+            AND viewable = 1 
+            ORDER BY post_date DESC 
+            LIMIT ?"
+        );
+        
+        $stmt->bind_param("si", $syntax, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $posts[] = $row;
+            }
+        }
+        
+        $stmt->close();
+        
+        return $posts;
+    }
+    
+    /**
+     * Get available syntax options
+     *
+     * @return array Syntax options
+     */
+    public function getSyntaxOptions()
+    {
+        $syntaxOptions = [];
+        
+        $query = "SELECT DISTINCT post_syntax FROM public_post WHERE viewable = 1 ORDER BY post_syntax";
+        $result = $this->db->query($query);
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                if (!empty($row['post_syntax'])) {
+                    $syntaxOptions[] = $row['post_syntax'];
+                }
+            }
+        }
+        
+        return $syntaxOptions;
+    }
+    
+    /**
+     * Search posts by user
+     *
+     * @param string $username Username to search for
+     * @param int $limit Number of posts to return
+     * @return array User's posts
+     */
+    public function searchByUser($username, $limit = 50)
+    {
+        $posts = [];
+        
+        if (empty($username)) {
+            return $posts;
+        }
+        
+        $stmt = $this->db->prepare(
+            "SELECT * FROM public_post 
+            WHERE posters_name = ? 
+            ORDER BY post_date DESC 
+            LIMIT ?"
+        );
+        
+        $stmt->bind_param("si", $username, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $posts[] = $row;
+            }
+        }
+        
+        $stmt->close();
+        
+        return $posts;
+    }
+    
+    /**
+     * Format search results for display
+     *
+     * @param array $posts Posts to format
+     * @return array Formatted posts
+     */
+    public function formatResults($posts)
+    {
+        $formattedPosts = [];
+        
+        foreach ($posts as $post) {
+            // Format date
+            $date = new DateTime($post['post_date']);
+            $post['formatted_date'] = $date->format('Y-m-d H:i');
+            
+            // Truncate text preview
+            $textPreview = strip_tags($post['post_text']);
+            $post['text_preview'] = (strlen($textPreview) > 150) 
+                ? substr($textPreview, 0, 147) . '...' 
+                : $textPreview;
+            
+            // Format post size
+            $post['formatted_size'] = number_format($post['post_size'], 2) . ' KB';
+            
+            $formattedPosts[] = $post;
+        }
+        
+        return $formattedPosts;
     }
 }
-
-// end of class
 ?>

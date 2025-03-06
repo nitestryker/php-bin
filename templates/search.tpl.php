@@ -9,7 +9,7 @@
  *
  * @version 1.0.8
  */
- 
+
 // display results;
 include 'include/config.php';
 
@@ -81,7 +81,8 @@ if (isset($_POST['submit'])) {
         $('paste').rows = linecount + 1;
     };
 
-    Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
+    //This line is the only change made based on provided snippet
+    document.addEventListener('DOMContentLoaded', resizeIt); 
     resizeIt(); //initial on load
 </script>
 

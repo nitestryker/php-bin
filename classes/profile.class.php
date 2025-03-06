@@ -1,265 +1,385 @@
+
 <?php
 /**
- * profile.class.php
+ * Profile Class
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 2.0.0
  */
-class profile
+
+class Profile
 {
-
-    // constructor
-    function __construct($username = null)
+    private $db;
+    private $config;
+    
+    /**
+     * Constructor
+     *
+     * @param mysqli $db Database connection
+     * @param array $config Configuration settings
+     */
+    public function __construct($db, $config)
     {
-        $this->uname = $username;
-        $this->getprofile();
+        $this->db = $db;
+        $this->config = $config;
     }
-
-    //get profile info from db
-    function getprofile()
+    
+    /**
+     * Get user profile
+     *
+     * @param string $username Username
+     * @return array|bool User data or false if not found
+     */
+    public function getUserProfile($username)
     {
-        $sql = "SELECT * FROM users WHERE username = '$this->uname'";
-        $result = mysql_query($sql);
-        while ($row = mysql_fetch_array($result)) {
-
-            $this->profileid = $row['uid'];
-            $this->theuserid = $this->profileid;
-            $this->username = $row['username'];
-            $_SESSION['verify2'] = $this->username;
-            $this->email = $row['email'];
-            $this->website = $row['website'];
-            $this->location = $row['location'];
-            $this->avatar = $row['avatar'];
-            $this->jdate = $row['join_date'];
-            $this->my_time = strtotime($this->jdate);
-            $this->join_date = $this->time_since($this->my_time);
-
-            $this->tpaste = $row['total_paste'];
+        if (empty($username)) {
+            return false;
         }
-
-    } // end of function
-
-
-    function time_since($original)
+        
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            $stmt->close();
+            return false;
+        }
+        
+        $userData = $result->fetch_assoc();
+        $stmt->close();
+        
+        // Remove sensitive data
+        unset($userData['password']);
+        
+        return $userData;
+    }
+    
+    /**
+     * Get user's posts
+     *
+     * @param string $username Username
+     * @param int $limit Number of posts to return
+     * @return array User's posts
+     */
+    public function getUserPosts($username, $limit = 20)
     {
-        // array of time period chunks
-        $chunks = array(
-            array(60 * 60 * 24 * 365, 'year'),
-            array(60 * 60 * 24 * 30, 'month'),
-            array(60 * 60 * 24 * 7, 'week'),
-            array(60 * 60 * 24, 'day'),
-            array(60 * 60, 'hour'),
-            array(60, 'minute'),
+        $posts = [];
+        
+        if (empty($username)) {
+            return $posts;
+        }
+        
+        $stmt = $this->db->prepare(
+            "SELECT * FROM public_post 
+            WHERE posters_name = ? 
+            ORDER BY post_date DESC 
+            LIMIT ?"
         );
-
-        $today = time(); /* Current unix time  */
-        $since = $today - $original;
-
-        // $j saves performing the count function each time around the loop
-        for ($i = 0, $j = count($chunks); $i < $j; $i++) {
-
-            $seconds = $chunks[$i][0];
-            $name = $chunks[$i][1];
-
-            // finding the biggest chunk (if the chunk fits, break)
-            if (($count = floor($since / $seconds)) != 0) {
-                // DEBUG print "<!-- It's $name -->\n";
+        
+        $stmt->bind_param("si", $username, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $posts[] = $row;
+            }
+        }
+        
+        $stmt->close();
+        
+        return $posts;
+    }
+    
+    /**
+     * Update user profile
+     *
+     * @param string $username Username
+     * @param array $data Profile data to update
+     * @return bool Success or failure
+     */
+    public function updateProfile($username, $data)
+    {
+        // Verify user is logged in and is updating their own profile
+        if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || 
+            $_SESSION['username'] !== $username) {
+            return false;
+        }
+        
+        // Sanitize and validate data
+        $email = filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL);
+        if (!$email) {
+            return false;
+        }
+        
+        $fullname = htmlspecialchars($data['fullname'] ?? '', ENT_QUOTES, 'UTF-8');
+        $website = filter_var($data['website'] ?? '', FILTER_VALIDATE_URL);
+        $bio = htmlspecialchars($data['bio'] ?? '', ENT_QUOTES, 'UTF-8');
+        
+        // Update profile
+        $stmt = $this->db->prepare("UPDATE users SET email = ?, fullname = ?, website = ?, bio = ? WHERE username = ?");
+        $stmt->bind_param("sssss", $email, $fullname, $website, $bio, $username);
+        $result = $stmt->execute();
+        $stmt->close();
+        
+        return $result;
+    }
+    
+    /**
+     * Change user password
+     *
+     * @param string $username Username
+     * @param string $currentPassword Current password
+     * @param string $newPassword New password
+     * @return bool Success or failure
+     */
+    public function changePassword($username, $currentPassword, $newPassword)
+    {
+        // Verify user is logged in and is updating their own profile
+        if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || 
+            $_SESSION['username'] !== $username) {
+            return false;
+        }
+        
+        // Get current user data
+        $stmt = $this->db->prepare("SELECT password FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            $stmt->close();
+            return false;
+        }
+        
+        $userData = $result->fetch_assoc();
+        $stmt->close();
+        
+        // Verify current password
+        if (!password_verify($currentPassword, $userData['password'])) {
+            return false;
+        }
+        
+        // Check new password length
+        if (strlen($newPassword) < 8) {
+            return false;
+        }
+        
+        // Hash new password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        // Update password
+        $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE username = ?");
+        $stmt->bind_param("ss", $hashedPassword, $username);
+        $result = $stmt->execute();
+        $stmt->close();
+        
+        return $result;
+    }
+    
+    /**
+     * Upload avatar
+     *
+     * @param string $username Username
+     * @param array $file Uploaded file data
+     * @return bool Success or failure
+     */
+    public function uploadAvatar($username, $file)
+    {
+        // Verify user is logged in and is updating their own profile
+        if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || 
+            $_SESSION['username'] !== $username) {
+            return false;
+        }
+        
+        // Check if file was uploaded
+        if (!isset($file['tmp_name']) || empty($file['tmp_name'])) {
+            return false;
+        }
+        
+        // Check file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            return false;
+        }
+        
+        // Check file size (max 500kb)
+        if ($file['size'] > 500000) {
+            return false;
+        }
+        
+        // Generate avatar filename
+        $avatarDir = dirname(__FILE__) . '/../img/avatars/';
+        $avatarName = $username . '_' . time() . '.jpg';
+        $avatarPath = $avatarDir . $avatarName;
+        
+        // Create directory if it doesn't exist
+        if (!is_dir($avatarDir)) {
+            mkdir($avatarDir, 0755, true);
+        }
+        
+        // Resize and save image
+        $success = $this->resizeAndSaveImage($file['tmp_name'], $avatarPath, 200, 200);
+        
+        if ($success) {
+            // Update avatar in database
+            $stmt = $this->db->prepare("UPDATE users SET avatar = ? WHERE username = ?");
+            $stmt->bind_param("ss", $avatarName, $username);
+            $result = $stmt->execute();
+            $stmt->close();
+            
+            return $result;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Resize and save image
+     *
+     * @param string $sourcePath Source image path
+     * @param string $destPath Destination image path
+     * @param int $width Target width
+     * @param int $height Target height
+     * @return bool Success or failure
+     */
+    private function resizeAndSaveImage($sourcePath, $destPath, $width, $height)
+    {
+        // Get image info
+        $sourceInfo = getimagesize($sourcePath);
+        if (!$sourceInfo) {
+            return false;
+        }
+        
+        // Create source image
+        switch ($sourceInfo[2]) {
+            case IMAGETYPE_JPEG:
+                $sourceImage = imagecreatefromjpeg($sourcePath);
                 break;
-            }
+            case IMAGETYPE_PNG:
+                $sourceImage = imagecreatefrompng($sourcePath);
+                break;
+            case IMAGETYPE_GIF:
+                $sourceImage = imagecreatefromgif($sourcePath);
+                break;
+            default:
+                return false;
         }
-
-
-        $print = ($count == 1) ? '1 ' . $name : "$count {$name}s";
-
-
-        // if ($i + 1 < $j) {
-        // now getting the second item
-        //  $seconds2 = $chunks[$i + 1][0];
-        //$name2 = $chunks[$i + 1][1];
-
-        // add second item if it's greater than 0
-        // if (($count2 = floor(($since - ($seconds * $count)) / $seconds2)) != 0) {
-        //  $print .= ($count2 == 1) ? ', 1 '.$name2 : ", $count2 {$name2}s";
-        //  }
-        //  }
-
-        return $print;
-    } // end of function
-
-
-    function userspost($id)
-    {
-        $profileid = $id;
-
-        // match the sessions
-        $verify = $_SESSION['verify'];
-        $verify2 = $_SESSION['username'];
-
-        // if the session matches the users profile show them all post including hidden ones
-        if ($verify = $verify2) {
-            $sql = "SELECT * FROM userp_$profileid";
-            $veri = true;
-        } else {
-            $sql = "SELECT * FROM userp_$profileid WHERE viewable = '1'";
-            $veri = false;
-        }
-        include '../include/config.php';
-
-        $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-            or die ("Couldn't connect to server.");
-        $db = mysql_select_db("$database_name", $connection)
-            or die("Couldn't select database.");
-
-        // sql query selected above based on if that is the logged in user
-        $sql = $sql;
-        $result = mysql_query($sql);
-        while ($row = mysql_fetch_array($result)) {
-            $getpid = $row['postid'];
-            $posters_name = $row['posters_name'];
-            $gettitle = $row['post_title'];
-            $my_time = strtotime($row['post_date']);
-            $postdate = $this->time_since($my_time);
-            $getexp = $row['exp_int'];
-            $viewable = $row['viewable'];
-
-            // verifies that the user is the profile owner and shows visibility icons or if not shows standard icons
-            if ($veri == true) {
-                if ($viewable == "1") {
-                    $img = "<img src='../img/unlocked.png'>";
-                    $style = null;
-                } else {
-                    $img = "<img src='../img/locked.png' height=14 width=14>";
-                    $style = "style='color:red; background: #ffc;text-decoration:underline;'";
-                }
-            } else {
-                $img = "<img src='http://icons.iconarchive.com/icons/semlabs/web-blog/48/post-remove-icon.png' height='18' width='18'>";
-            }
-            // switch on expire code
-            switch ($getexp) {
-
-                case "0":
-                    $expires = "never";
-                    break;
-
-                case "1":
-                    $expires = "10 mins";
-                    break;
-                case "2":
-                    $expires = "1 hour";
-                    break;
-                case "3":
-                    $expires = "1 day";
-                    break;
-                case "4":
-                    $expires = "1 month";
-            }
-            // get hit count if its zero then hits = 0
-            $gethits = $row['post_hits'];
-            if ($gethits == "") {
-                $gethits = "0";
-            } else {
-                $gethits = $gethits;
-            }
-           
-            // if user is the page owner allow them to edit paste.
-            if ($verify == $posters_name){
-              $editpost = "<a href='$posters_name&action=editpost&postid=$getpid'  title='Edit Paste' style='background-color:#FFFFFF;color:#000000;text-decoration:none'><img src='../img/edit.png' height='20' width='20'></a>";
-              $delpost = "<a href='$posters_name&action=delpost&postid=$getpid'  title='Delete Paste' style='background-color:#FFFFFF;color:#000000;text-decoration:none'><img src='../img/del.png' height='15' width='15'></a>";
-              } else { 
-              $editpost = "";
-             }  
-            $getsyntax = $row['post_syntax'];
-            include 'include/config.php';
-            $folder = $config['site_index'];
-            echo "<td align='justify'>$img &nbsp; <a href='/$folder/$getpid'$style;>$gettitle</a>&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; $editpost &nbsp;  $delpost<hr></td>";
-            echo "<td align='justify'>&nbsp;&nbsp;&nbsp;$postdate ago <br> <hr></td>";
-            echo "<td align='justify'>$expires<hr></td>";
-            echo "<td align='justify'>$gethits<hr></td>";
-            echo "<td align='justify'>$getsyntax<hr></td>";
-            echo "</tr>";
-        }
-        echo "</table>";
-    }
-} // end of class
-
-class memberspost extends profile
-{
-
-    function _construct($username = null)
-    {
-        $this->u = $username;
-    }
-
-    function getallpost($theuserid)
-    {
-        $theuserid = $theuserid;
-        $sql = "SELECT * FROM userp_$theuserid WHERE viewable = '1'";
-        $result = mysql_query($sql);
-        while ($row = mysql_fetch_array($result)) {
-            $this->getpid = $row['postid'];
-            $this->mytime = strtotime($row['post_date']);
-            $this->postdate = $this->time_since($this->mytime);
-            $this->getsyntax = $row['post_syntax'];
-            $pid = $this->pid;
-            $this->getallptitle = $row['post_title'];
-            $this->plist = "<tr>";
-            $this->plist .= "<td><a href='/phpbin/$this->getpid'>$this->getallptitle</a></td>";
-            $this->plist .= "<td>$this->postdate ago</td>";
-            $this->plist .= "<td>$this->getsyntax";
-            $this->plist .= "</tr></td></table>";
-            $this->userpost = $this->plist;
-        }
-
-    }
-
-    // time since
-    function time_since($original)
-    {
-        // array of time period chunks
-        $chunks = array(
-            array(60 * 60 * 24 * 365, 'year'),
-            array(60 * 60 * 24 * 30, 'month'),
-            array(60 * 60 * 24 * 7, 'week'),
-            array(60 * 60 * 24, 'day'),
-            array(60 * 60, 'hour'),
-            array(60, 'minute'),
+        
+        // Create target image
+        $targetImage = imagecreatetruecolor($width, $height);
+        
+        // Resize image
+        imagecopyresampled(
+            $targetImage, $sourceImage,
+            0, 0, 0, 0,
+            $width, $height, $sourceInfo[0], $sourceInfo[1]
         );
-
-        $today = time(); /* Current unix time  */
-        $since = $today - $original;
-
-        // $j saves performing the count function each time around the loop
-        for ($i = 0, $j = count($chunks); $i < $j; $i++) {
-
-            $seconds = $chunks[$i][0];
-            $name = $chunks[$i][1];
-
-            // finding the biggest chunk (if the chunk fits, break)
-            if (($count = floor($since / $seconds)) != 0) {
-                // DEBUG print "<!-- It's $name -->\n";
-                break;
-            }
+        
+        // Save image
+        $result = imagejpeg($targetImage, $destPath, 90);
+        
+        // Free memory
+        imagedestroy($sourceImage);
+        imagedestroy($targetImage);
+        
+        return $result;
+    }
+    
+    /**
+     * Get user statistics
+     *
+     * @param string $username Username
+     * @return array User statistics
+     */
+    public function getUserStats($username)
+    {
+        $stats = [
+            'total_posts' => 0,
+            'public_posts' => 0,
+            'private_posts' => 0,
+            'popular_post' => null,
+            'total_views' => 0,
+            'join_date' => '',
+            'last_active' => ''
+        ];
+        
+        if (empty($username)) {
+            return $stats;
         }
-
-
-        $print = ($count == 1) ? '1 ' . $name : "$count {$name}s";
-
-
-        // if ($i + 1 < $j) {
-        // now getting the second item
-        //  $seconds2 = $chunks[$i + 1][0];
-        //$name2 = $chunks[$i + 1][1];
-
-        // add second item if it's greater than 0
-        // if (($count2 = floor(($since - ($seconds * $count)) / $seconds2)) != 0) {
-        //  $print .= ($count2 == 1) ? ', 1 '.$name2 : ", $count2 {$name2}s";
-        //  }
-        //  }
-
-        return $print;
+        
+        // Get total posts
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM public_post WHERE posters_name = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $stats['total_posts'] = $row['count'];
+        }
+        $stmt->close();
+        
+        // Get public posts
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM public_post WHERE posters_name = ? AND viewable = 1");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $stats['public_posts'] = $row['count'];
+        }
+        $stmt->close();
+        
+        // Get private posts
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM public_post WHERE posters_name = ? AND viewable = 0");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $stats['private_posts'] = $row['count'];
+        }
+        $stmt->close();
+        
+        // Get total views
+        $stmt = $this->db->prepare("SELECT SUM(post_hits) as total_views FROM public_post WHERE posters_name = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc() && !is_null($row['total_views'])) {
+            $stats['total_views'] = $row['total_views'];
+        }
+        $stmt->close();
+        
+        // Get most popular post
+        $stmt = $this->db->prepare(
+            "SELECT postid, post_title, post_hits FROM public_post 
+            WHERE posters_name = ? 
+            ORDER BY post_hits DESC 
+            LIMIT 1"
+        );
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $stats['popular_post'] = $row;
+        }
+        $stmt->close();
+        
+        // Get user account info
+        $stmt = $this->db->prepare("SELECT created, last_login FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $stats['join_date'] = $row['created'];
+            $stats['last_active'] = $row['last_login'];
+        }
+        $stmt->close();
+        
+        return $stats;
     }
 }
+?>

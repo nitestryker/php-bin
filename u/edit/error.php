@@ -1,6 +1,7 @@
+
 <?php
 /**
- * Error page for user directory
+ * Error page for user edit directory
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
@@ -9,10 +10,10 @@
  * @version 2.0.0
  */
 
-require_once '../include/config.php';
-require_once '../include/db.php';
-require_once '../include/session.php';
-require_once '../classes/conn.class.php';
+require_once '../../include/config.php';
+require_once '../../include/db.php';
+require_once '../../include/session.php';
+require_once '../../classes/conn.class.php';
 
 $usr = "Unknown";
 if (isset($_GET['usr'])) {
@@ -29,22 +30,16 @@ if (isset($_GET['usr'])) {
     <meta name="keywords" content="pastebin, code sharing, error"/>
     <meta name="author" content="PHP-Bin">
 
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/bootstrap.css" rel="stylesheet">
-    <link href="../css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/bootstrap.css" rel="stylesheet">
+    <link href="../../css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/bootstrap.js"></script>
-    <script>
-        function textAreaAdjust(o) {
-            o.style.height = "1px";
-            o.style.height = (25 + o.scrollHeight) + "px";
-        }
-    </script>
+    <script type="text/javascript" src="../../js/bootstrap.js"></script>
 </head>
 
 <body>
@@ -55,7 +50,7 @@ if (isset($_GET['usr'])) {
                 <h2>Error</h2>
                 <p>Sorry, an error occurred while processing your request.</p>
                 <p>User: <?=$usr;?></p>
-                <p><a href="../index.php" class="btn btn-primary">Return to Homepage</a></p>
+                <p><a href="../../index.php" class="btn btn-primary">Return to Homepage</a></p>
             </div>
         </div>
     </div>

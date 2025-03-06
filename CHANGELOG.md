@@ -1,4 +1,20 @@
+
 # Changelog
+
+### V2.0.0 (July 2023)
+
+    + Upgraded to PHP 7.4+ compatibility
+    + Updated all jQuery libraries to secure versions (3.6.0)
+    + Improved security with proper input validation and sanitization
+    + Fixed all header warning issues
+    + Added CSRF protection to forms
+    + Updated all HTTP links to HTTPS
+    + Fixed session handling and timing issues
+    + Modernized JavaScript code
+    + Improved error handling
+    + Added better security headers
+    + Fixed jQuery related issues in live updates
+    + Added support for modern browsers
 
 ### V1.1.0 
 
@@ -7,8 +23,6 @@
     # Fixed Fatal Error on failed registration
     # Fixed off-centered registration error text
     
-    
-     
 ### V1.0.9 (March 10th 2015)
 
     # Various Bugs Fixed.
@@ -87,7 +101,3 @@
 ### V1.0.0-Beta (Jan 2, 2014)
 
     * Initial release
-   
-    
-   
-                                        
