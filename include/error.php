@@ -4,197 +4,72 @@
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
- *
-*  When an error occurs such as a 404 this file will be displayed 
-*/
-error_reporting(0);
-include 'include/config.php';
-// if user is not logged in show login form at the top
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    $uid = $_SESSION['uid'];
-    $form = "Welcome <a href='profile.php?uid=$uid'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='index.php?action=logout'>logout</a>";
-    $uname = $_SESSION['username'];
-} else {
-    $form = "<input class='span2' type='text' name='username' placeholder='User name'>";
-    $form .= "<input class='span2' type='password' name='password' placeholder='Password'>";
-    $form .= "<input type='submit' name='submit' value='Login' class='btn'/>";
-    $form .= "</form>";
-    $form .= "<ul class='nav pull-right'>";
-    $form .= "<li><a href='register.php'>Registration</a></li>";
-}
+ * @version 2.0.0
+ */
 
+// Get error code
+$errorCode = isset($_GET['code']) ? intval($_GET['code']) : 404;
 
-$pid = $_GET['pid'];
+// Define error messages
+$errorMessages = [
+    400 => 'Bad Request',
+    401 => 'Unauthorized',
+    403 => 'Forbidden',
+    404 => 'Not Found',
+    500 => 'Internal Server Error',
+    503 => 'Service Unavailable'
+];
 
-/*
- *
-* Error Handling
-*
-*/
-if (empty($pid)) {
-    $pid = null;
-    exit();
-}
+// Get error message or default to "Unknown Error"
+$errorMessage = isset($errorMessages[$errorCode]) ? $errorMessages[$errorCode] : 'Unknown Error';
 
-if (is_numeric($pid)) {
-    $pid = $pid;
-} else {
-    $pid = "";
-    goto next;
-}
+// Set the HTTP response code
+http_response_code($errorCode);
 ?>
-<?php next: ?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>Error <?php echo $errorCode; ?></title>
     <meta charset="utf-8">
-    <title><?=$config['site_name'];?></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="rien">
-    <meta name="keywords" content="rien"/>
-    <meta name="author" content="Php-pastebin">
-
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
-
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script>
-        function textAreaAdjust(o) {
-            o.style.height = "1px";
-            o.style.height = (25 + o.scrollHeight) + "px";
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
         }
-    </script>
+        .error-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #d9534f;
+        }
+        .error-image {
+            margin: 20px 0;
+        }
+        .home-link {
+            margin-top: 20px;
+        }
+    </style>
 </head>
-
 <body>
-
-<script type="text/javascript" language="javascript">
-    resizeIt = function () {
-        var str = $('paste').value;
-        var cols = $('paste').cols;
-
-        var linecount = 0;
-        $A(str.split("\n")).each(function (l) {
-            linecount += Math.ceil(l.length / cols); // take into account long lines
-        })
-        $('paste').rows = linecount + 1;
-    };
-
-    Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
-    resizeIt(); //initial on load
-</script>
-
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <a class="brand" href="/">Pastebin Clone</a>
-
-            <div class="nav-collapse collapse">
-
-                <ul class="nav">
-                    <li><a href="index.php">Add a new paste</a></li>
-                    <li><a href="fixmelater">View all pastes</a></li>
-
-                </ul>
-                <!---- login form here---->
-                <form class="navbar-form pull-right" action="index.php?action=login" method="post"/>
-                <?=$form;?>
-                <ul class="nav pull-right">
-
-                    <!----Registration button here-->
-
-
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
+    <div class="error-container">
+        <h1>Error <?php echo $errorCode; ?></h1>
+        <p><?php echo $errorMessage; ?></p>
+        <div class="error-image">
+            <img src="img/sad.png" alt="Error" width="128">
+        </div>
+        <div class="home-link">
+            <a href="index.php">Return to Home</a>
         </div>
     </div>
-</div>
-<header class="jumbotron masthead" id="overview">
-
-    </div>
-</header>
-<div class="container-fluid">
-
-
-    <div class="row-fluid">
-        <div class="span2 offset1">
-            <div class="base-block">
-                <div class="title">Paste Search</div>
-                <form class="form-search" name="form1" method="get" action="Search/">
-                    <div class="input-prepend">
-
-                        <input type="text" name="searchPaste" class="span12">
-                        <input type="hidden" name="searchToken">
-                    </div>
-                </form>
-            </div>
-            <div class="base-block">
-                <div class="title">Recent pastes</div>
-
-                <ul class="nav nav-list">
-
-                    <!--Recent Post go here -->
-                    <li>
-                        <? include 'include/live.php';?>
-                    </li>
-                </ul>
-            </div>
-            <!--/base-block-->
-
-        </div>
-
-        <div class="span8">
-            <div class="base-block">
-                <div class="title">Error - Not Found</div>
-
-                <!--posted code goes here-->
-
-                <div class="c" style="font-family: monospace;">
-                    <center><img src="img/sad.png" height=50 width=50>&nbsp; sorry post # <font
-                        color="red"><?=$pid;?></font> was not found <img src="img/sad.png" height=50 width=50>
-                        <center>
-                            <center><b>please try again</b><Br>
-                                <center></h1>
-
-
-                </div>
-                <!--/row-->
-            </div>
-            <!--/span-->
-        </div>
-        <!--/row-->
-
-        <script type="text/javascript">
-            $(document).ready(function () {
-                $("[rel=tooltip]").tooltip();
-            });
-        </script>
-
-        <hr>
-
-        <footer class="span8">
-            <p>Pastebin Clone - developed by <a href="" target="_BLANK">Nitestryker Software</A></p>
-        </footer>
-
-    </div>
-    <!-- /container -->
 </body>
 </html>
