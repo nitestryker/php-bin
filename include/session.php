@@ -7,6 +7,18 @@
  * @version 2.0.0
  */
 
+// Include config file if not already included
+if (!isset($config)) {
+    if (file_exists(dirname(__FILE__) . '/config.php')) {
+        include_once(dirname(__FILE__) . '/config.php');
+    } else {
+        // Default values if config is not available
+        $config = array(
+            'session_max_lifetime' => 3600, // 1 hour default
+        );
+    }
+}
+
 // Set session cookie parameters before session_start()
 session_name('PHPBIN_SESSION');
 
