@@ -7,9 +7,6 @@
  * @version 2.0.0
  */
 
-// Load configuration
-require_once 'config.php';
-
 // Set session cookie parameters before session_start()
 session_name('PHPBIN_SESSION');
 
@@ -64,9 +61,4 @@ if (isset($_SESSION['last_activity']) &&
 
 // Update last activity time
 $_SESSION['last_activity'] = time();
-
-// Set Security Headers - Repeat from config for consistency
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('X-XSS-Protection: 1; mode=block');
 ?>

@@ -1,3 +1,4 @@
+
 <?php
 /**
  * config.php
@@ -10,10 +11,12 @@
  * @version 2.0.0
  */
  
-// Security headers
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('X-XSS-Protection: 1; mode=block');
+// Security headers - only set if headers aren't sent yet
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-XSS-Protection: 1; mode=block');
+}
 
 // Admin configuration
 $config['site_admin_email'] = "administrator@yoursite.com";
@@ -51,9 +54,13 @@ $config['tmpl_file_basepath'] = $config['site_index'] . "/templates/";
 /* Session security 
 -------------------------------------------------------------------*/
 $config['session_max_lifetime'] = 3600; // 1 hour in seconds
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 1); // For HTTPS connections
+
+// Only set session ini settings if headers haven't been sent
+if (!headers_sent()) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 1); // For HTTPS connections
+}
 
 ########## Error-Catching ##########
 # Note: changes as needed for debugging issues  
