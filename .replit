@@ -2,3 +2,21 @@ modules = ["php-8.2", "nodejs-20", "web", "python-3.12"]
 
 [nix]
 channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "php -S 0.0.0.0:8080"]
+
+[workflows]
+runButton = "Run PHP Server"
+
+[[workflows.workflow]]
+name = "Run PHP Server"
+author = 39049334
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php -S 0.0.0.0:8080"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
