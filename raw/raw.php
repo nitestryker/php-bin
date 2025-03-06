@@ -1,49 +1,60 @@
+
 <?php
 /**
- * raw.php (raw post)
+ * Raw View Page
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 2.0.0
  */
- 
-$rid = $_GET['rid'];
-if ($rid == "") {
-    redirect();
-}
-$rid = htmlspecialchars($rid);
-$rid = trim(htmlspecialchars($rid, ENT_QUOTES, "utf-8"));
 
-// make connection to database
-require '../include/config.php';
-$database_name = $database_name;
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-    or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-    or die("Couldn't select database.");
+// Include required files
+require_once '../include/config.php';
+require_once '../include/db.php';
+require_once '../classes/conn.class.php';
 
-$sql = "SELECT * FROM public_post WHERE postid = $rid";
-$result = mysql_query($sql);
-while ($row = mysql_fetch_array($result)) {
-    $post_text = $row['post_text'];
-
-}
-if ($post_text == "") {
-    echo "Sorry &nbsp;<b>$rid</b> was not found, Please try again";
-    exit();
-}
-include_once '../include/geshi.php';
-$syntax = "text";
-$geshi = new GeSHi($post_text, $syntax);
-echo $geshi->parse_code();
-mysql_close($connection);
-function redirect()
-{
-    header('refresh:0; url=index.php');
-    include 'index.php';
+// Disable output buffering
+while (ob_get_level()) {
+    ob_end_clean();
 }
 
+// Initialize connection
+$conn = new Conn($mysqli, $config);
+
+// Validate the post ID
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    header('HTTP/1.1 400 Bad Request');
+    echo 'Invalid post ID';
+    exit;
+}
+
+// Get the post data
+$stmt = $conn->db->prepare("SELECT * FROM public_post WHERE post_id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result && $row = $result->fetch_assoc()) {
+    // Check if post is viewable
+    if ($row['viewable'] != 1) {
+        header('HTTP/1.1 403 Forbidden');
+        echo 'This paste is not viewable';
+        exit;
+    }
+
+    // Set the content type
+    header('Content-Type: text/plain; charset=utf-8');
+    header('Content-Disposition: inline; filename="paste-'.$id.'.txt"');
+    
+    // Output the raw code
+    echo $row['post_text'];
+} else {
+    header('HTTP/1.1 404 Not Found');
+    echo 'Post not found';
+}
+$stmt->close();
 ?>

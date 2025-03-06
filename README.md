@@ -1,59 +1,73 @@
-( this was a Collaboration Project I am  now the only one maintaining the code)
 
-## What is phpbin?
+# PHP-Bin
 
-phpbin is a PHP-based web application that allows you to store text online for a set period of time.
+A modern PHP-based web application that allows you to store and share text online for a set period of time.
 
-### Features:
+## Features
 
-1. Store text online for a set period of time
-2. Syntax highlighting
-3. Line numbers for debugging purposes 
-4. Download to text File
-5. Share link on Social Media
-6. Quick Print  
-7. Report Abuse 
-8. Live recent post sidebar 
-9. Cron-job to prune expired post. 
+- Store text online for a set period of time
+- Syntax highlighting for multiple programming languages
+- Line numbers for debugging purposes
+- Download to text file capability
+- Share links on social media platforms
+- Quick print functionality
+- Report abuse system
+- Live recent post sidebar
+- Cron-job to prune expired posts
+- User registration and profile management
+- Public and private paste options
+- Search by syntax and content
 
-### Requirements:
+## Requirements
 
-- PHP <= 5.4
-- Mysql >= 5.0
-- Cron-Job or Scheduled Task
+- PHP >= 7.4
+- MySQL >= 5.7 or MariaDB >= 10.3
+- Modern web browser with JavaScript enabled
+- Cron-Job or Scheduled Task for automatic pruning
 
-### Known issues in V1.0.9
+## Installation
 
-1. Paste Archive when  number of paste exceed the page limit it starts are new     page. the paste on the next page will not appear this is a bug. and will be fixed soon.
-   
+1. Create a database and import the database tables located in `/install/sql`
+2. Edit `/include/config.php` with your database settings and site preferences
+3. Edit `.htaccess` file if necessary for your server configuration
+4. Set up a cron job to run `/include/cronjob.php` at regular intervals
+5. Ensure proper file permissions
 
-#### Work around 
+## Alternative to Cron Jobs
 
-if you hosting service does not offer cron-jobs / scheduled tasks you can still prune post, 
-just not as effectively as running a cronjob, you do this  by including the cronjob script on different pages
-when a user hits the page it will run the cronjob script and prune necessary post.
+If your hosting service does not offer cron-jobs/scheduled tasks, you can include the cronjob script on different pages:
 
-the script is located in /include/cronjob.php  
+```php
+include('include/cronjob.php');
+```
 
-ex. add   include('include/cronjob.php');    on several pages
+This will run the pruning script when users visit pages where it's included, though it's less efficient than a proper cron job.
 
-### Bug Tracker / Reporting Bugs 
+## Bug Tracking / Reporting Bugs
 
-Please feel free to report any bugs you find so I can fix them,
-either by submitting them directly on my [bug tracker] (https://www.hostedredmine.com/projects/phpbin/)
-or via email at [nitestryker@gmail.com](mailto:nitestryker@gmail.com)
+Please feel free to report any bugs by creating an issue in the GitHub repository or via email at [administrator@example.com](mailto:administrator@example.com).
 
-please make sure to be as detailed as possible and if possible send screenshots.
+When reporting bugs, please provide:
+- Detailed description of the issue
+- Steps to reproduce
+- Screenshots if possible
+- Browser and PHP version information
 
+## Security
 
-### Current Version V1.0.9
+This application implements several security measures:
+- CSRF protection on forms
+- Input validation and sanitization
+- Secure password hashing
+- XSS prevention
+- HTTPS encouraged for all resources
 
-For the current CHANGELOG please visit [CHANGELOG] (https://www.hostedredmine.com/projects/phpbin/wiki)
+## Credits
 
-installation instructions
-======
-      
-   1.  create database install database tables located in (/install/sql) 
-   2.  edit  /include/config.php 
-   3.  edit .htaccess file  
-  
+PHP-Bin is maintained by Jeremy Stevens.
+Copyright 2014-2023 Jeremy Stevens.
+Licensed under GPL 2 (http://www.gnu.org/licenses/gpl.html)
+
+## Current Version: 2.0.0
+
+See CHANGELOG.md for the complete version history.

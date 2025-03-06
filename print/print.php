@@ -1,83 +1,130 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-  <head>
-  <meta http-equiv="content-type" content="text/html; charset=windows-1250">
-  <meta name="generator" content="PSPad editor, www.pspad.com">
-  <title></title>
-   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-    <script>
-var doPrintPage;
 
-function printPage(){
-    window.print();
-    // this does not work for Chrom Version 34.0.1847.116 
-    window.onfocus=function(){ window.close();}
-}
-
-$(document).ready(function(){
-    $('input').blur(function(){
-        //3sec after the user leaves the input, printPage will fire
-        doPrintPage = setTimeout('printPage();', 3000);
-    });
-    $('input').focus(function(){
-        //But if another input gains focus printPage won't fire
-        clearTimeout(doPrintPage);
-    });
-});
-</script>
-  </head>
- <body onload="printPage()">
-
-  </body>
-</html>
 <?php
 /**
- * print.php (easy print post)
+ * Print Page
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 2.0.0
  */
-ob_start();
-error_reporting(E_ALL);
 
-$rid = $_GET['rid'];
-if ($rid == "") {
-    redirect();
-}
-$rid = htmlspecialchars($rid);
-$rid = trim(htmlspecialchars($rid, ENT_QUOTES, "utf-8"));
+// Include required files
+require_once '../include/config.php';
+require_once '../include/db.php';
+require_once '../include/session.php';
+require_once '../classes/conn.class.php';
+require_once '../include/geshi.php';
 
-// make connection to database
-require '../include/config.php';
-$database_name = $database_name;
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-    or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-    or die("Couldn't select database.");
+// Initialize connection
+$conn = new Conn($mysqli, $config);
 
-$sql = "SELECT * FROM public_post WHERE postid = $rid";
-$result = mysql_query($sql);
-while ($row = mysql_fetch_array($result)) {
-    $post_text = $row['post_text'];
-
-}
-if ($post_text == "") {
-    echo "Sorry &nbsp;<b>$rid</b> was not found, Please try again";
-    exit();
-}
-include_once '../include/geshi.php';
-$syntax = "text";
-$geshi = new GeSHi($post_text, $syntax);
-echo $geshi->parse_code();
-mysql_close($connection);
-function redirect()
-{
-    header('refresh:0; url=index.php');
-    include 'index.php';
+// Validate the post ID
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    die('Invalid post ID');
 }
 
+// Get the post data
+$stmt = $conn->db->prepare("SELECT * FROM public_post WHERE post_id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result && $row = $result->fetch_assoc()) {
+    // Check if post is viewable
+    if ($row['viewable'] != 1) {
+        die('This paste is not viewable');
+    }
+    
+    $title = !empty($row['post_title']) ? htmlspecialchars($row['post_title'], ENT_QUOTES, 'UTF-8') : 'Untitled';
+    $code = $row['post_text'];
+    $syntax = $row['post_syntax'];
+    
+    // Set up GeSHi for syntax highlighting
+    $geshi = new GeSHi($code, $syntax);
+    $geshi->enable_line_numbers(GESHI_NORMAL_LINE_NUMBERS);
+    $highlighted_code = $geshi->parse_code();
+} else {
+    die('Post not found');
+}
+$stmt->close();
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Print: <?php echo $title; ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+        body {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 20px;
+            padding: 0;
+            background: #ffffff;
+            color: #000000;
+        }
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .footer {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .code-container {
+            margin: 20px 0;
+            max-width: 100%;
+            overflow: auto;
+        }
+        .print-button {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><?php echo $title; ?></h1>
+        <div class="no-print">
+            <button onclick="window.print();" class="print-button">Print</button>
+            <button onclick="window.close();" class="print-button">Close</button>
+        </div>
+    </div>
+    
+    <div class="code-container">
+        <?php echo $highlighted_code; ?>
+    </div>
+    
+    <div class="footer">
+        <p>Printed from <?php echo $config['site_name']; ?> - <?php echo date('Y-m-d H:i:s'); ?></p>
+    </div>
+    
+    <script>
+        // Auto-print when page loads
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
