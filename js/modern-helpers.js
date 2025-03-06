@@ -7,10 +7,12 @@
  */
 
 // Document ready function compatible with modern jQuery
-$(document).ready(function() {
+jQuery(document).ready(function($) {
     // Initialize tooltips if Bootstrap is available
     if (typeof $.fn.tooltip === 'function') {
         $('[data-toggle="tooltip"]').tooltip();
+    } else {
+        console.log("Bootstrap tooltip function not available");
     }
 
     // Handle text area auto-resize
@@ -23,17 +25,37 @@ $(document).ready(function() {
     $('.copy-btn').on('click', function() {
         const textToCopy = $(this).data('clipboard-text');
         if (textToCopy) {
-            navigator.clipboard.writeText(textToCopy).then(function() {
-                // Success message
-                const btn = $(this);
-                const originalText = btn.text();
-                btn.text('Copied!');
-                setTimeout(function() {
-                    btn.text(originalText);
-                }, 2000);
-            }).catch(function(err) {
-                console.error('Could not copy text: ', err);
-            });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    // Success message
+                    const btn = $(this);
+                    const originalText = btn.text();
+                    btn.text('Copied!');
+                    setTimeout(function() {
+                        btn.text(originalText);
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Could not copy text: ', err);
+                });
+            } else {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    const btn = $(this);
+                    const originalText = btn.text();
+                    btn.text('Copied!');
+                    setTimeout(function() {
+                        btn.text(originalText);
+                    }, 2000);
+                } catch (err) {
+                    console.error('Fallback: Could not copy text: ', err);
+                }
+                document.body.removeChild(textarea);
+            }
         }
     });
 
@@ -74,11 +96,11 @@ function showMessage(message, type = 'info') {
         </div>
     `;
     
-    $('#message-container').html(alertHtml);
+    jQuery('#message-container').html(alertHtml);
     
     // Auto-dismiss after 5 seconds
     setTimeout(function() {
-        $('#message-container .alert').alert('close');
+        jQuery('#message-container .alert').alert('close');
     }, 5000);
 }
 
@@ -94,4 +116,24 @@ function getUrlParameter(name) {
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
     var results = regex.exec(location.search);
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+
+// Legacy support for older code using $ function
+if (typeof $ !== 'function') {
+    function $(id) {
+        return document.getElementById(id);
+    }
+}
+
+// Legacy support for Event.observe
+if (typeof Event === 'undefined' || typeof Event.observe !== 'function') {
+    var Event = Event || {};
+    Event.observe = function(element, eventName, callback) {
+        if (typeof element === 'string') {
+            element = document.getElementById(element);
+        }
+        if (element) {
+            element.addEventListener(eventName, callback, false);
+        }
+    };
 }
