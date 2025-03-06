@@ -11,17 +11,17 @@
 */
 
 
-// start session 
-session_start();
-// error reporting 
-error_reporting(0);
+// Use improved session management
+require_once 'include/session.php';
+
+// Error reporting is now handled in config.php
 $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
 if ($action == "post") {
     include_once 'classes/post.class.php';
     include_once 'include/config.php';
     $check = new post();
     $results = $check->logincheck();
-     
+
     // switch based on reg users or guest
     switch ($results) {
 
@@ -42,7 +42,7 @@ if ($action == "post") {
             $rd = new post();
             $rd->redirect();
             break;
-          
+
         case "guest":
 
             // make a connection to the database
@@ -59,8 +59,8 @@ if ($action == "post") {
             $cmd->Guest();
             $rd = new post();
             $rd->redirect();
-            
-             
+
+
     }
 
 

@@ -1,18 +1,29 @@
+
 <?php
 /**
  * post.php
  *
  * @package PHP-Bin
- * @author Nitestryker
+ * @author Jeremy Stevens (original), Updated 2023
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.1.0 
+ * @version 2.0.0
  *  
- *     V1.1.0 Changes 
- *     added random  avatar rotation for guest users
+ *     V2.0.0 Changes 
+ *     - Modernized PHP code
+ *     - Added security features
+ *     - Replaced deprecated mysql functions with mysqli
  *    
 */
+
+// Error handling
 error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
+// Include session management
+require_once 'include/session.php';
+
+// Process post action if requested
 $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
 if ($action == "post") {
     include_once 'classes/post.class.php';
@@ -20,74 +31,63 @@ if ($action == "post") {
     $check = new post();
     $results = $check->logincheck();
      
-    // switch based on reg users or guest
+    // Switch based on reg users or guest
     switch ($results) {
-
         case "user":
-
-            // make a connection to the database
-            include 'include/config.php';
-            $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-                or die ("Couldn't connect to server.");
-            $db = mysql_select_db("$database_name", $connection)
-                or die("Couldn't select database.");
-
-            // create a new post for registered users
+            // Include the database connection
+            include_once 'include/db.php';
+            
+            // Create a new post for registered users
             $cmd = new post();
             $cmd->RegUser();
-            $rd = new post();
             $post_id = $_SESSION['postid'];
             $rd = new post();
             $rd->redirect();
             break;
           
         case "guest":
-
-            // make a connection to the database
-            include 'include/config.php';
+            // Include the database connection
+            include_once 'include/db.php';
             $post_id = $_SESSION['postid'];
 
-            $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-                or die ("Couldn't connect to server.");
-            $db = mysql_select_db("$database_name", $connection)
-                or die("Couldn't select database.");
-
-            // create new post & post as guest
+            // Create new post & post as guest
             $cmd = new post();
             $cmd->Guest();
             $rd = new post();
             $rd->redirect();
-            
-             
     }
-
-
 }
-require_once 'classes/post.class.php';
-// get the post id number
-$pid = $_GET['pid'];
-$_SESSION['pdel'] = $pid;
-// include config file and connect to db
-include 'include/config.php';
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-    or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-    or die("Couldn't select database.");
 
-// new object
+// Process viewing a post
+require_once 'classes/post.class.php';
+
+// Get the post id number
+$pid = isset($_GET['pid']) ? (int)$_GET['pid'] : 0;
+if ($pid <= 0) {
+    // Handle invalid post ID
+    header("Location: index.php");
+    exit;
+}
+
+$_SESSION['pdel'] = $pid;
+
+// Include database connection
+include_once 'include/db.php';
+
+// Create post object and get post data
 $post = new post();
 $post->getPost($pid);
 
-// get the vars
+// Get post data
 $id = $post->id;
 $post_id = $post->post_id;
 $_SESSION['post_id'] = $post_id;
 
 $posters_name = $post->posters_name;
-if ($posters_name == "guest"){
-$imagesrc = "include/avatar.php?uimage=$posters_name";		
-}else {
-$imagesrc = "include/avatar.php?uimage=$posters_name";		
+if ($posters_name == "guest") {
+    $imagesrc = "include/avatar.php?uimage=$posters_name";
+} else {
+    $imagesrc = "include/avatar.php?uimage=$posters_name";
 }
 $post_title = $post->post_title;
 $post_syntax = $post->post_syntax;
@@ -95,55 +95,42 @@ $post_exp = $post->exp_int;
 $post_text = $post->post_text;
 $post_date = $post->post_date;
 $post_size = $post->post_size;
-$post_hits = $post->post_hits;
-if ($post_hits == "") {
-    $post_hits = "0";
-} else {
-    $post_hits = $post_hits;
-}
+$post_hits = $post->post_hits ?? 0;
+
 $namelink = $post->namelink;
 $bitly = $post->bitly;
-// if bitly is not empty show shorten link
+
+// If bitly is not empty show shortened link
 if (empty($bitly)) {
- $link_title = "   ";
- $bitly = null;
-}
-if (isset($bitly)) {
+    $link_title = "";
+    $bitly = null;
+} else {
     $link_title = "&nbsp; Short Link: ";
-    $bitly = "<a href='$bitly'>$bitly</a>";
+    $bitly = "<a href='" . htmlspecialchars($bitly, ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($bitly, ENT_QUOTES, 'UTF-8') . "</a>";
 }
 
-// update view counts
-$get = new post();
-$get->hits();
+// Update view counts
+$post->hits();
 
-// if the user is  a registered user update hit total count
-if (isset($_SESSION['reguser']))
-{
-$regbool = $_SESSION['reguser'];	
-}else{
-  $regbool = 0;	
+// If the user is a registered user update hit total count
+$regbool = $_SESSION['reguser'] ?? 0;
+if ($regbool == "1") {
+    // Update total hit count
+    $post->totalHits();
+    
+    // Get user ID and update user hits
+    $uid = $post->getuid($posters_name);
+    $post->updateUsrhits($uid);
 }
-if ($regbool == "1"){
- // update the total hit count
- $get = new post();
- $get->totalHits();
-// test
-  $get = new post();
-  $uid = $get->getuid($posters_name);
- // update the post with
- $get = new post();
- $get->updateUsrhits($uid);
 
-}
+// Format the date
 $fdate = date('F j, Y', strtotime($post_date));
-// switch on expiration
-switch ($post_exp) {
 
+// Set expiration text
+switch ($post_exp) {
     case "0":
         $expires = "never";
         break;
-
     case "1":
         $expires = "10 mins";
         break;
@@ -155,8 +142,11 @@ switch ($post_exp) {
         break;
     case "4":
         $expires = "1 month";
+        break;
+    default:
+        $expires = "unknown";
 }
 
-
-include_once  'templates/post.tpl.php';
+// Include template
+include_once 'templates/post.tpl.php';
 ?>

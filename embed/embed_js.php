@@ -1,59 +1,75 @@
 <?php
 /**
- * embed_js.php
+ * Embed JS - Embeds a paste in an external site
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @version 1.0.8
+ * @version 2.0.0
  */
-error_reporting(E_ALL);
 
-$rid = $_GET['rid'];
-if ($rid == "") {
-    redirect();
-}
-$rid = htmlspecialchars($rid);
-$rid = trim(htmlspecialchars($rid, ENT_QUOTES, "utf-8"));
+// Include required files
+require_once '../include/config.php';
+require_once '../include/db.php';
+require_once '../classes/conn.class.php';
+require_once '../include/geshi.php';
 
-// make connection to database
-require '../include/config.php';
-$database_name = $database_name;
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-    or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-    or die("Couldn't select database.");
+// Set appropriate content type for JavaScript
+header('Content-Type: application/javascript');
 
-$sql = "SELECT * FROM public_post WHERE postid = $rid";
-$result = mysql_query($sql);
-while ($row = mysql_fetch_array($result)) {
-    $post_text = $row['post_text'];
-    $post_syntax = $row['post_syntax'];
+// Initialize connection
+$conn = new Conn($mysqli, $config);
+
+// Validate the post ID
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    echo 'document.write("<div style=\'color:red\'>Invalid paste ID</div>");';
+    exit;
 }
-if ($post_text == "") {
-    echo "Sorry &nbsp;<b>$rid</b> was not found, Please try again";
-    exit();
+
+// Get the post data
+$stmt = $conn->db->prepare("SELECT * FROM public_post WHERE post_id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result && $row = $result->fetch_assoc()) {
+    // Check if post is viewable
+    if ($row['viewable'] != 1) {
+        echo 'document.write("<div style=\'color:red\'>This paste is not viewable</div>");';
+        exit;
+    }
+
+    $title = !empty($row['post_title']) ? $row['post_title'] : 'Untitled';
+    $code = $row['post_text'];
+    $syntax = $row['post_syntax'];
+
+    // Set up GeSHi for syntax highlighting
+    $geshi = new GeSHi($code, $syntax);
+    $geshi->enable_line_numbers(GESHI_NORMAL_LINE_NUMBERS);
+    $highlighted_code = $geshi->parse_code();
+
+    // Escape for JavaScript output
+    $title = addslashes($title);
+    $highlighted_code = addslashes($highlighted_code);
+
+    // Create the embedded output
+    echo <<<JAVASCRIPT
+(function() {
+    var html = '<div style="border:1px solid #ccc;padding:10px;margin:10px 0;background:#f9f9f9;max-width:800px;max-height:600px;overflow:auto;">';
+    html += '<div style="font-family:Arial,sans-serif;margin-bottom:10px;font-weight:bold;">' + '{$title}' + '</div>';
+    html += '{$highlighted_code}';
+    html += '<div style="font-size:11px;margin-top:10px;text-align:right;font-family:Arial,sans-serif;">';
+    html += 'Shared from <a href="{$config['site_url']}/post.php?id={$id}" target="_blank">{$config['site_name']}</a>';
+    html += '</div>';
+    html += '</div>';
+    document.write(html);
+})();
+JAVASCRIPT;
+} else {
+    echo 'document.write("<div style=\'color:red\'>Paste not found</div>");';
 }
-include_once '../include/geshi.php';
-$syntax = $post_syntax;
-$geshi = new GeSHi($post_text, $syntax);
-$embed = $geshi->parse_code();
-mysql_close($connection);
+$stmt->close();
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-  <head>
-  <meta http-equiv="content-type" content="text/html; charset=windows-1250">
-  <meta name="generator" content="PSPad editor, www.pspad.com">
-  <title></title>
-  </head>
- <body>
-<p id="output"></p>
-  <script language="JavaScript"> 
- var myvar = <?php echo json_encode($embed); ?>;
-document.getElementById("output").innerHTML = myvar
-</script>
-  </body>
-</html>

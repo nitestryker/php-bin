@@ -31,7 +31,7 @@ include_once 'include/config.php';
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?=$config['site_name'];?> </title>
+    <title><?php if(isset($config['site_name'])) echo $config['site_name']; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="rien">
     <meta name="keywords" content="rien"/>
@@ -70,8 +70,10 @@ include_once 'include/config.php';
         $('paste').rows = linecount + 1;
     };
 
-    Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
-    resizeIt(); //initial on load
+    document.addEventListener('DOMContentLoaded', function() {
+        resizeIt(); //initial on load
+    });
+
 </script>
 
 <div class="navbar navbar-fixed-top">
@@ -82,8 +84,8 @@ include_once 'include/config.php';
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            <?include 'include/config.php';?>
-            <a class="brand" href="/"><?=$config['site_name'];?></a>
+            <?php include 'include/config.php';?>
+            <a class="brand" href="/"><?php if(isset($config['site_name'])) echo $config['site_name']; ?></a>
 
             <div class="nav-collapse collapse">
 
@@ -176,5 +178,3 @@ include_once 'include/config.php';
 <!-- /container -->
 </body>
 </html>
-
-
