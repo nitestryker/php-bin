@@ -10,81 +10,91 @@
  * @version 2.0.0
  */
 
+declare(strict_types=1);
+
 class DatabaseConnection
 {
-    private $connection;
-    private $config;
+    private ?mysqli $connection = null;
+    private array $config;
 
-    public function __construct($config)
+    public function __construct(array $config)
     {
         $this->config = $config;
         $this->connect();
     }
 
-    private function connect()
+    private function connect(): void
     {
-        $this->connection = mysqli_connect(
-            $this->config['dbhost'], 
-            $this->config['dbusername'], 
-            $this->config['dbpasswd'], 
-            $this->config['database_name']
-        );
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        
+        try {
+            $this->connection = new mysqli(
+                $this->config['dbhost'],
+                $this->config['dbusername'],
+                $this->config['dbpasswd'],
+                $this->config['database_name']
+            );
 
-        if (!$this->connection) {
-            die("Database connection failed: " . mysqli_connect_error());
+            $this->connection->set_charset('utf8mb4');
+        } catch (mysqli_sql_exception $e) {
+            throw new RuntimeException('Database connection failed: ' . $e->getMessage());
         }
-
-        // Set charset to utf8mb4
-        mysqli_set_charset($this->connection, 'utf8mb4');
     }
 
-    public function query($sql)
+    public function query(string $sql): mysqli_result|bool
     {
-        $result = mysqli_query($this->connection, $sql);
-        if (!$result) {
-            error_log("SQL Error: " . mysqli_error($this->connection));
+        try {
+            return $this->connection->query($sql);
+        } catch (mysqli_sql_exception $e) {
+            error_log("SQL Error: " . $e->getMessage());
+            throw $e;
         }
-        return $result;
     }
 
-    public function prepare($sql)
+    public function prepare(string $sql): mysqli_stmt
     {
-        return mysqli_prepare($this->connection, $sql);
+        return $this->connection->prepare($sql);
     }
 
-    public function escape($string)
+    public function escape(string $string): string
     {
-        return mysqli_real_escape_string($this->connection, $string);
+        return $this->connection->real_escape_string($string);
     }
 
-    public function fetchAssoc($result)
+    public function fetchAssoc(mysqli_result $result): ?array
     {
-        return mysqli_fetch_assoc($result);
+        return $result->fetch_assoc();
     }
 
-    public function fetchArray($result)
+    public function fetchArray(mysqli_result $result): array|null|false
     {
-        return mysqli_fetch_array($result);
+        return $result->fetch_array();
     }
 
-    public function numRows($result)
+    public function numRows(mysqli_result $result): int
     {
-        return mysqli_num_rows($result);
+        return $result->num_rows;
     }
 
-    public function affectedRows()
+    public function affectedRows(): int
     {
-        return mysqli_affected_rows($this->connection);
+        return $this->connection->affected_rows;
     }
 
-    public function close()
+    public function lastInsertId(): int
     {
-        mysqli_close($this->connection);
+        return $this->connection->insert_id;
     }
 
-    public function lastInsertId()
+    public function close(): void
     {
-        return mysqli_insert_id($this->connection);
+        if ($this->connection) {
+            $this->connection->close();
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->close();
     }
 }
-?>

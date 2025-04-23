@@ -1,153 +1,125 @@
 <?php
+declare(strict_types=1);
+
 /**
  * profile.php
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @author Nitestryker 
- * @copyright 2014-2015 Jeremy Stevens 
- * @copyright 2015 Nitestryker 
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
-*/
-error_reporting(0);
-// start session
-session_start();
+ * @version 2.0.0
+ */
 
-$proid = $_GET['usr'];
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => true,
+    'cookie_samesite' => 'Strict'
+]);
 
-// edit profile
-    $action = (isset($_GET['action'])) ? $_GET['action'] : "null";
-   // TODO add code to prevent SQL injection.
-   $action = clean($action); 
+$proid = $_GET['usr'] ?? '';
+$action = $_GET['action'] ?? 'null';
+$action = cleanInput($action);
 
-    // verify user and then allow to edit profile      
-   if ($action == "edit") {
-
-    // verify that the logged in user is the same as the profile user
-    $verify = $_SESSION['verify'];
-    if ($verify == $proid) {
-    header("refresh:0; url=edit/$proid");
-    }else {
-        // if not verified redirect
-        header("refresh:0; url=$proid");
-      exit();
+// Edit profile handling
+if ($action === 'edit') {
+    $verify = $_SESSION['verify'] ?? '';
+    if ($verify === $proid) {
+        header("Location: edit/$proid");
+        exit();
     }
-}
-  // action edit paste
-  if($action == "editpost") {
-  $verify = $_SESSION['verify'];
-   $post = $_GET['postid'];
-
- // verify user is who they say they are 
-  if ($verify == $proid) {
-    header("refresh:0; url=editpost/$post");
-    }else {
-        // if not verified redirect
-        header("refresh:0; url=$proid");
-      exit();
-    }
-
-}
-
-
-// include need files
-include_once '../include/config.php';
-include '../classes/profile.class.php';
-// make connection to database
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-    or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-    or die("Couldn't select database.");
-
-// new instance
-$profile = new profile($proid);
-$_SESSION['profile_id'] = $proid;
-// variables from class
-$profieid = $profile->profileid;
-$r2 = $profile->profileid;
-$username = $profile->username;
-$email = $profile->email;
-$website = $profile->website;
-$location = $profile->location;
-$avatar = $profile->avatar;
-$jdate = $profile->jdate;
-
-// get the total hit count for the user
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-or die("Couldn't select database.");
-$result = mysql_query("SELECT SUM(post_hits) AS value_sum FROM userp_$profieid", $connection);
-$row = mysql_fetch_assoc($result);
-$sum = $row['value_sum'];
-$thits = $sum;
-
-// convert join date
-$join_date = date('F j, Y', strtotime($jdate));
-
-// if userid is not found do this
-if (empty($profieid)) {
-    include 'error.php';
+    header("Location: $proid");
     exit();
 }
-// dev test
-$verify = $_SESSION['verify'];
-if ($verify == $username) {
-    $dev = true;
-} else
-    $dev = false;
-if ($dev == 1) {
-    $edit = "<a href='$proid&action=edit'>edit profile</a>";
-}
-// if location is null show N/A
-if ($location == "") {
-    $location = "N/A";
-} else {
-    $location = $location;
-}
-// if website is blank show N/A
-if ($website == "") {
-    $website = "N/A";
-} else {
 
-// vaidate the url address
-if (!filter_var($website, FILTER_VALIDATE_URL) === false) {
-    $address = $website;
-} else {
-    $address = "http://$website";
+// Edit post handling
+if ($action === 'editpost') {
+    $verify = $_SESSION['verify'] ?? '';
+    $post = $_GET['postid'] ?? '';
+
+    if ($verify === $proid) {
+        header("Location: editpost/$post");
+        exit();
+    }
+    header("Location: $proid");
+    exit();
 }
 
-  // remove illegal characters from address 
- $address = filter_var($address, FILTER_SANITIZE_URL);
+require_once '../include/config.php';
+require_once '../classes/profile.class.php';
 
-    $website = "<a href='$address'>$address</a>";
-}
+try {
+    $db = new PDO(
+        "mysql:host=$dbhost;dbname=$database_name;charset=utf8mb4",
+        $dbusername,
+        $dbpasswd,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
 
-// if  total hit count is null then display 0
-if (empty($thits)) {
-    $thits = "0";
-} else {
-    $thits = $thits;
-}
+    $profile = new Profile($proid);
+    $_SESSION['profile_id'] = $proid;
 
- function clean($var = null)
-    {
-        // sanitation
-        $var = htmlspecialchars($var);
-        $var = trim(htmlspecialchars($var, ENT_QUOTES, "utf-8"));
-        $var = strip_tags($var);
-        return $var;
+    $profileId = $profile->profileId;
+    $username = $profile->username;
+    $email = $profile->email;
+    $website = $profile->website;
+    $location = $profile->location ?: 'N/A';
+    $avatar = $profile->avatar;
+    $joinDate = $profile->joinDate;
+
+    // Get total hits
+    $stmt = $db->prepare("SELECT SUM(post_hits) AS total_hits FROM userp_?");
+    $stmt->execute([$profileId]);
+    $result = $stmt->fetch();
+    $totalHits = $result['total_hits'] ?? 0;
+
+    $joinDate = (new DateTime($joinDate))->format('F j, Y');
+
+    if (empty($profileId)) {
+        require 'error.php';
+        exit();
     }
 
-//test 2
-$connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-    or die ("Couldn't connect to server.");
-$db = mysql_select_db("$database_name", $connection)
-    or die("Couldn't select database.");
+    $isOwner = ($_SESSION['verify'] ?? '') === $username;
+    $editLink = $isOwner ? "<a href='$proid&action=edit'>edit profile</a>" : '';
 
-$result = mysql_query("SELECT * FROM userp_$profieid", $connection);
-$num_rows = mysql_num_rows($result);
-include '../templates/profile.tpl.php';
-?>
+    // Website handling
+    if (!empty($website)) {
+        $website = filter_var($website, FILTER_SANITIZE_URL);
+        if (!str_starts_with($website, 'http')) {
+            $website = "http://$website";
+        }
+        if (filter_var($website, FILTER_VALIDATE_URL)) {
+            $website = "<a href='" . htmlspecialchars($website, ENT_QUOTES) . "'>" . htmlspecialchars($website, ENT_QUOTES) . "</a>";
+        }
+    } else {
+        $website = 'N/A';
+    }
+
+    // Get post count
+    $stmt = $db->prepare("SELECT COUNT(*) as count FROM userp_?");
+    $stmt->execute([$profileId]);
+    $postCount = $stmt->fetch()['count'] ?? 0;
+
+    require '../templates/profile.tpl.php';
+
+} catch (PDOException $e) {
+    error_log("Database Error: " . $e->getMessage());
+    header("Location: error.php");
+    exit();
+} catch (Exception $e) {
+    error_log("General Error: " . $e->getMessage());
+    header("Location: error.php");
+    exit();
+}
+
+function cleanInput(string $input): string {
+    return htmlspecialchars(
+        trim($input),
+        ENT_QUOTES | ENT_HTML5,
+        'UTF-8'
+    );
+}

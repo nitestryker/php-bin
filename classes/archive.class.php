@@ -1,227 +1,208 @@
-
 <?php
+declare(strict_types=1);
+
 /**
  * Archive Class
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 2.0.0
+ * @version 2.1.0-modern
  */
 
 class Archive
 {
-    private $db;
-    private $config;
-    
+    private mysqli $db;
+    private array $config;
+
     /**
      * Constructor
      *
-     * @param mysqli $db Database connection
-     * @param array $config Configuration settings
+     * @param mysqli $db
+     * @param array $config
      */
-    public function __construct($db, $config)
+    public function __construct(mysqli $db, array $config)
     {
         $this->db = $db;
         $this->config = $config;
     }
-    
+
     /**
      * Get recent public posts
      *
-     * @param int $limit Number of posts to return
-     * @return array Recent posts
+     * @param int $limit
+     * @return array
      */
-    public function getRecentPosts($limit = 20)
+    public function getRecentPosts(int $limit = 20): array
     {
         $posts = [];
-        
-        $query = "SELECT * FROM public_post WHERE viewable = 1 ORDER BY post_date DESC LIMIT " . intval($limit);
-        $result = $this->db->query($query);
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        $limit = max(1, $limit); // prevent zero or negative limits
+
+        $query = "SELECT * FROM public_post WHERE viewable = 1 ORDER BY post_date DESC LIMIT ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
+        $stmt->close();
         return $posts;
     }
-    
+
     /**
      * Get popular public posts
      *
-     * @param int $limit Number of posts to return
-     * @return array Popular posts
+     * @param int $limit
+     * @return array
      */
-    public function getPopularPosts($limit = 20)
+    public function getPopularPosts(int $limit = 20): array
     {
         $posts = [];
-        
-        $query = "SELECT * FROM public_post WHERE viewable = 1 ORDER BY post_hits DESC LIMIT " . intval($limit);
-        $result = $this->db->query($query);
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        $limit = max(1, $limit);
+
+        $query = "SELECT * FROM public_post WHERE viewable = 1 ORDER BY post_hits DESC LIMIT ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
+        $stmt->close();
         return $posts;
     }
-    
+
     /**
      * Search public posts
      *
-     * @param string $query Search query
-     * @param int $limit Number of posts to return
-     * @return array Search results
+     * @param string $query
+     * @param int $limit
+     * @return array
      */
-    public function searchPosts($query, $limit = 50)
+    public function searchPosts(string $query, int $limit = 50): array
     {
         $posts = [];
-        
-        if (empty($query)) {
+
+        if (empty(trim($query))) {
             return $posts;
         }
-        
+
         $searchTerm = '%' . $this->db->real_escape_string($query) . '%';
-        
+        $limit = max(1, $limit);
+
         $stmt = $this->db->prepare(
             "SELECT * FROM public_post 
-            WHERE (post_title LIKE ? OR post_text LIKE ?) 
-            AND viewable = 1 
-            ORDER BY post_date DESC 
-            LIMIT ?"
+             WHERE (post_title LIKE ? OR post_text LIKE ?) 
+             AND viewable = 1 
+             ORDER BY post_date DESC 
+             LIMIT ?"
         );
-        
+
         $stmt->bind_param("ssi", $searchTerm, $searchTerm, $limit);
         $stmt->execute();
+
         $result = $stmt->get_result();
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
         $stmt->close();
-        
         return $posts;
     }
-    
+
     /**
      * Get posts by syntax
      *
-     * @param string $syntax Syntax filter
-     * @param int $limit Number of posts to return
-     * @return array Filtered posts
+     * @param string $syntax
+     * @param int $limit
+     * @return array
      */
-    public function getPostsBySyntax($syntax, $limit = 50)
+    public function getPostsBySyntax(string $syntax, int $limit = 50): array
     {
         $posts = [];
-        
-        if (empty($syntax)) {
+
+        if (empty(trim($syntax))) {
             return $posts;
         }
-        
+
+        $limit = max(1, $limit);
         $stmt = $this->db->prepare(
             "SELECT * FROM public_post 
-            WHERE post_syntax = ? 
-            AND viewable = 1 
-            ORDER BY post_date DESC 
-            LIMIT ?"
+             WHERE post_syntax = ? 
+             AND viewable = 1 
+             ORDER BY post_date DESC 
+             LIMIT ?"
         );
-        
+
         $stmt->bind_param("si", $syntax, $limit);
         $stmt->execute();
+
         $result = $stmt->get_result();
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
         $stmt->close();
-        
         return $posts;
     }
-    
+
     /**
-     * Get available syntax options
+     * Get all distinct syntax options from public posts
      *
-     * @return array Syntax options
+     * @return array
      */
-    public function getSyntaxOptions()
+    public function getSyntaxOptions(): array
     {
-        $syntaxOptions = [];
-        
+        $options = [];
         $query = "SELECT DISTINCT post_syntax FROM public_post WHERE viewable = 1 ORDER BY post_syntax";
+
         $result = $this->db->query($query);
-        
         if ($result) {
             while ($row = $result->fetch_assoc()) {
-                $syntaxOptions[] = $row['post_syntax'];
+                $options[] = $row['post_syntax'];
             }
         }
-        
-        return $syntaxOptions;
+
+        return $options;
     }
-    
+
     /**
-     * Get post statistics
+     * Get global post statistics
      *
-     * @return array Statistics
+     * @return array
      */
-    public function getStatistics()
+    public function getStatistics(): array
     {
         $stats = [
             'total_posts' => 0,
             'total_public_posts' => 0,
             'total_private_posts' => 0,
             'total_syntax_options' => 0,
-            'total_size' => 0
+            'total_size' => '0.00'
         ];
-        
-        // Get total posts
-        $query = "SELECT COUNT(*) AS count FROM public_post";
-        $result = $this->db->query($query);
-        if ($result && $row = $result->fetch_assoc()) {
-            $stats['total_posts'] = $row['count'];
+
+        $queries = [
+            'total_posts'           => "SELECT COUNT(*) AS count FROM public_post",
+            'total_public_posts'    => "SELECT COUNT(*) AS count FROM public_post WHERE viewable = 1",
+            'total_private_posts'   => "SELECT COUNT(*) AS count FROM public_post WHERE viewable = 0",
+            'total_syntax_options'  => "SELECT COUNT(DISTINCT post_syntax) AS count FROM public_post",
+            'total_size'            => "SELECT SUM(CAST(post_size AS DECIMAL(10,2))) AS total_size FROM public_post"
+        ];
+
+        foreach ($queries as $key => $sql) {
+            $result = $this->db->query($sql);
+            if ($result && ($row = $result->fetch_assoc())) {
+                $stats[$key] = $key === 'total_size'
+                    ? number_format((float)($row['total_size'] ?? 0), 2)
+                    : (int)$row['count'];
+            }
         }
-        
-        // Get public posts
-        $query = "SELECT COUNT(*) AS count FROM public_post WHERE viewable = 1";
-        $result = $this->db->query($query);
-        if ($result && $row = $result->fetch_assoc()) {
-            $stats['total_public_posts'] = $row['count'];
-        }
-        
-        // Get private posts
-        $query = "SELECT COUNT(*) AS count FROM public_post WHERE viewable = 0";
-        $result = $this->db->query($query);
-        if ($result && $row = $result->fetch_assoc()) {
-            $stats['total_private_posts'] = $row['count'];
-        }
-        
-        // Get syntax options
-        $query = "SELECT COUNT(DISTINCT post_syntax) AS count FROM public_post";
-        $result = $this->db->query($query);
-        if ($result && $row = $result->fetch_assoc()) {
-            $stats['total_syntax_options'] = $row['count'];
-        }
-        
-        // Get total size
-        $query = "SELECT SUM(CAST(post_size AS DECIMAL(10,2))) AS total_size FROM public_post";
-        $result = $this->db->query($query);
-        if ($result && $row = $result->fetch_assoc() && !is_null($row['total_size'])) {
-            $stats['total_size'] = number_format($row['total_size'], 2);
-        }
-        
+
         return $stats;
     }
 }
-?>

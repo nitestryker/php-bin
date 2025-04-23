@@ -1,21 +1,19 @@
+
 language: php
 
 php:
-  - 5.4
-  - 5.5
-  - 5.6
+  - 8.2
+  - 8.1
+  - 8.0
 
 env:
   - DB=mysql 
 
 script: phpunit --configuration phpunit.xml --coverage-text
 
-# Notifications
-
 matrix:
   allow_failures:
-
-# Notifications
+    - php: 8.2
 
 notifications:
   email:

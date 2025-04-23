@@ -1,77 +1,81 @@
 <?php
+declare(strict_types=1);
+
 /**
  * submit.php
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
+ * @version 2.0.0
  */
-error_reporting(0);
-include_once '../../include/config.php';
-session_start();
-// get the name of the users profile
-$proid = $_GET['usr'];
 
-// the verified user
-$user = $_SESSION['verify'];
+require_once '../../include/config.php';
 
-// if a avatar is selected update avatar otherwize only update other info
-if(is_uploaded_file($_FILES['q2_uploadAvatar']['tmp_name'])){
- 
-	$maxsize=$_POST['MAX_FILE_SIZE'];		
-	$size=$_FILES['q2_uploadAvatar']['size'];
-    // getting the image info..
-   $imgdetails = getimagesize($_FILES['q2_uploadAvatar']['tmp_name']);
-	$mime_type = $imgdetails['mime']; 
-  $filename=$_FILES['q2_uploadAvatar']['name'];
-  $imgData =addslashes (file_get_contents($_FILES['q2_uploadAvatar']['tmp_name'])); 
+// Start session with strict settings
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => true,
+    'cookie_samesite' => 'Strict'
+]);
 
-  // connect to database
-   MySQL_connect("$dbhost","$dbusername","$dbpasswd");
-mysql_select_db($database_name) or die("Could not select database")
-    or die ("Couldn't connect to server.");
-  $web = $_POST['q4_website'];
+// Get verified user
+$user = $_SESSION['verify'] ?? null;
+if (!$user) {
+    header('Location: ../error.php');
+    exit();
+}
 
-  // clean input
-  $web = clean($web);
-  $loc = $_POST['q3_location'];
-  // clean input
-  $loc = clean($loc);
+try {
+    // Initialize database connection
+    $dsn = "mysql:host=$dbhost;dbname=$database_name;charset=utf8mb4";
+    $pdo = new PDO($dsn, $dbusername, $dbpasswd, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false
+    ]);
 
-  // mysql query
-  mysql_query("UPDATE users SET website= '$web', location='$loc', avatar='$imgData' WHERE username ='$user'"); 
-  header("refresh:0; url=../$user"); 
-  // if an avatar is not uploaded then do not include it in the query because it will override the one in the database
-  } else {
-  
-   $web = $_POST['q4_website'];
-   // clean input
-   $web = clean($web);
-
-  $loc = $_POST['q3_location'];
-  // clean input
-  $loc = clean($loc);
-  // connect to database
-
- MySQL_connect("$dbhost","$dbusername","$dbpasswd");
-mysql_select_db($database_name) or die("Could not select database")
-    or die ("Couldn't connect to server.");
-  // query
-  mysql_query("UPDATE users SET website= '$web', location='$loc' WHERE username ='$user'");
-
-// redirect when complete
- header("refresh:0; url=../$user");
- }
-
-
-// clean users input
-function clean($var){
-    $var = htmlspecialchars($var);
-    $var = mysql_real_escape_string($var);
-    $var = strip_tags($var);
-    return $var;
+    // Handle avatar upload
+    if (isset($_FILES['q2_uploadAvatar']) && is_uploaded_file($_FILES['q2_uploadAvatar']['tmp_name'])) {
+        $maxSize = (int)$_POST['MAX_FILE_SIZE'];
+        $size = $_FILES['q2_uploadAvatar']['size'];
+        
+        if ($size > $maxSize) {
+            throw new RuntimeException('File too large');
+        }
+        
+        // Validate image
+        $imgDetails = getimagesize($_FILES['q2_uploadAvatar']['tmp_name']);
+        if ($imgDetails === false) {
+            throw new RuntimeException('Invalid image file');
+        }
+        
+        $imgData = file_get_contents($_FILES['q2_uploadAvatar']['tmp_name']);
+        
+        // Update profile with image
+        $stmt = $pdo->prepare("UPDATE users SET website = ?, location = ?, avatar = ? WHERE username = ?");
+        $stmt->execute([
+            filter_input(INPUT_POST, 'q4_website', FILTER_SANITIZE_URL),
+            filter_input(INPUT_POST, 'q3_location', FILTER_SANITIZE_STRING),
+            $imgData,
+            $user
+        ]);
+    } else {
+        // Update profile without image
+        $stmt = $pdo->prepare("UPDATE users SET website = ?, location = ? WHERE username = ?");
+        $stmt->execute([
+            filter_input(INPUT_POST, 'q4_website', FILTER_SANITIZE_URL),
+            filter_input(INPUT_POST, 'q3_location', FILTER_SANITIZE_STRING),
+            $user
+        ]);
     }
-?>
+    
+    header("Location: ../$user");
+    exit();
+    
+} catch (Exception $e) {
+    error_log("Profile update error: " . $e->getMessage());
+    header('Location: ../error.php');
+    exit();
+}

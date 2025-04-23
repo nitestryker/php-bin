@@ -1,180 +1,162 @@
-
 <?php
 /**
  * Error Handler
  *
  * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2023 Jeremy Stevens
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
  * @version 2.0.0
  */
 
-/**
- * Custom error handler function
- * 
- * @param int $errno Error number
- * @param string $errstr Error message
- * @param string $errfile File where error occurred
- * @param int $errline Line number where error occurred
- * @return bool True to prevent PHP default error handler
- */
-function customErrorHandler($errno, $errstr, $errfile, $errline) {
-    // Get current error reporting level
-    $error_reporting = error_reporting();
+declare(strict_types=1);
+
+class ErrorHandler {
+    private const LOG_PATH = __DIR__ . '/../logs/';
     
-    // If error reporting is turned off or error not included in error_reporting
-    if ($error_reporting === 0 || !($errno & $error_reporting)) {
+    public static function init(): void {
+        error_reporting(E_ALL);
+        ini_set('display_errors', '0');
+        ini_set('log_errors', '1');
+        
+        set_error_handler([self::class, 'handleError']);
+        set_exception_handler([self::class, 'handleException']);
+        register_shutdown_function([self::class, 'handleFatalError']);
+        
+        // Ensure log directory exists
+        if (!is_dir(self::LOG_PATH)) {
+            mkdir(self::LOG_PATH, 0755, true);
+        }
+    }
+    
+    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): bool {
+        if (!(error_reporting() & $errno)) {
+            return false;
+        }
+        
+        $message = self::formatError($errno, $errstr, $errfile, $errline);
+        self::logError($message, self::getLogFile($errno));
+        
+        if (self::isFatal($errno)) {
+            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        }
+        
         return true;
     }
     
-    // Different handling based on error type
-    switch ($errno) {
-        case E_USER_ERROR:
-            $error_type = 'Fatal Error';
-            $log_file = 'php-error.log';
-            break;
-        case E_USER_WARNING:
-        case E_WARNING:
-            $error_type = 'Warning';
-            $log_file = 'php-warning.log';
-            break;
-        case E_USER_NOTICE:
-        case E_NOTICE:
-            $error_type = 'Notice';
-            $log_file = 'php-notice.log';
-            break;
-        default:
-            $error_type = 'Unknown Error';
-            $log_file = 'php-unknown.log';
-    }
-    
-    // Format error message for logging
-    $message = date('[Y-m-d H:i:s]') . " $error_type: $errstr in $errfile on line $errline" . PHP_EOL;
-    
-    // Determine if we should log to file
-    $log_to_file = true;
-    
-    // If we're in development environment, display error on screen
-    if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
-        echo "<div style='background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;'>";
-        echo "<h3>$error_type</h3>";
-        echo "<p><strong>Message:</strong> $errstr</p>";
-        echo "<p><strong>File:</strong> $errfile</p>";
-        echo "<p><strong>Line:</strong> $errline</p>";
-        echo "</div>";
-    }
-    
-    // Log error to file
-    if ($log_to_file) {
-        $log_path = __DIR__ . '/../logs/' . $log_file;
-        error_log($message, 3, $log_path);
-    }
-    
-    // Fatal errors should halt execution
-    if ($errno === E_USER_ERROR) {
-        exit(1);
-    }
-    
-    // Return true to prevent default PHP error handler
-    return true;
-}
-
-// Register custom error handler
-set_error_handler('customErrorHandler');
-
-/**
- * Custom exception handler
- * 
- * @param Exception|Throwable $exception The exception
- */
-function customExceptionHandler($exception) {
-    $errfile = $exception->getFile();
-    $errline = $exception->getLine();
-    $errstr = $exception->getMessage();
-    $trace = $exception->getTraceAsString();
-    
-    // Format exception message for logging
-    $message = date('[Y-m-d H:i:s]') . " Uncaught Exception: $errstr in $errfile on line $errline" . PHP_EOL;
-    $message .= "Stack trace:" . PHP_EOL . $trace . PHP_EOL . PHP_EOL;
-    
-    // Determine if we should log to file
-    $log_to_file = true;
-    
-    // If we're in development environment, display exception on screen
-    if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
-        echo "<div style='background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;'>";
-        echo "<h3>Uncaught Exception</h3>";
-        echo "<p><strong>Message:</strong> $errstr</p>";
-        echo "<p><strong>File:</strong> $errfile</p>";
-        echo "<p><strong>Line:</strong> $errline</p>";
-        echo "<p><strong>Stack trace:</strong></p>";
-        echo "<pre>$trace</pre>";
-        echo "</div>";
-    } else {
-        // In production, show a friendly error message
-        echo "<div style='background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;'>";
-        echo "<h3>Application Error</h3>";
-        echo "<p>An unexpected error occurred. The site administrator has been notified.</p>";
-        echo "</div>";
-    }
-    
-    // Log exception to file
-    if ($log_to_file) {
-        $log_path = __DIR__ . '/../logs/php-exception.log';
-        error_log($message, 3, $log_path);
-    }
-    
-    // Exit with an error code
-    exit(1);
-}
-
-// Register custom exception handler
-set_exception_handler('customExceptionHandler');
-
-/**
- * Handle fatal errors
- */
-function fatalErrorHandler() {
-    $error = error_get_last();
-    
-    if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-        $errno = $error['type'];
-        $errstr = $error['message'];
-        $errfile = $error['file'];
-        $errline = $error['line'];
+    public static function handleException(Throwable $exception): void {
+        $message = self::formatException($exception);
+        self::logError($message, 'php-exception.log');
         
-        // Format fatal error message for logging
-        $message = date('[Y-m-d H:i:s]') . " Fatal Error: $errstr in $errfile on line $errline" . PHP_EOL;
-        
-        // Determine if we should log to file
-        $log_to_file = true;
-        
-        // If we're in development environment, display error on screen
-        if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') {
-            echo "<div style='background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;'>";
-            echo "<h3>Fatal Error</h3>";
-            echo "<p><strong>Message:</strong> $errstr</p>";
-            echo "<p><strong>File:</strong> $errfile</p>";
-            echo "<p><strong>Line:</strong> $errline</p>";
-            echo "</div>";
+        if (self::isDevMode()) {
+            self::displayDevError($exception);
         } else {
-            // In production, show a friendly error message
-            echo "<div style='background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;'>";
-            echo "<h3>Application Error</h3>";
-            echo "<p>An unexpected error occurred. The site administrator has been notified.</p>";
-            echo "</div>";
+            self::displayProductionError();
         }
+    }
+    
+    public static function handleFatalError(): void {
+        $error = error_get_last();
         
-        // Log error to file
-        if ($log_to_file) {
-            $log_path = __DIR__ . '/../logs/php-fatal.log';
-            error_log($message, 3, $log_path);
+        if ($error !== null && self::isFatal($error['type'])) {
+            self::handleError(
+                $error['type'],
+                $error['message'],
+                $error['file'],
+                $error['line']
+            );
         }
+    }
+    
+    private static function formatError(int $errno, string $errstr, string $errfile, int $errline): string {
+        $type = self::getErrorType($errno);
+        return sprintf(
+            "[%s] %s: %s in %s on line %d\n",
+            date('Y-m-d H:i:s'),
+            $type,
+            $errstr,
+            $errfile,
+            $errline
+        );
+    }
+    
+    private static function formatException(Throwable $exception): string {
+        return sprintf(
+            "[%s] Uncaught %s: %s in %s on line %d\nStack trace:\n%s\n",
+            date('Y-m-d H:i:s'),
+            get_class($exception),
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine(),
+            $exception->getTraceAsString()
+        );
+    }
+    
+    private static function logError(string $message, string $logFile): void {
+        error_log($message, 3, self::LOG_PATH . $logFile);
+    }
+    
+    private static function getLogFile(int $errno): string {
+        return match($errno) {
+            E_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR => 'php-error.log',
+            E_WARNING, E_USER_WARNING => 'php-warning.log',
+            E_NOTICE, E_USER_NOTICE => 'php-notice.log',
+            default => 'php-other.log',
+        };
+    }
+    
+    private static function getErrorType(int $errno): string {
+        return match($errno) {
+            E_ERROR => 'Fatal Error',
+            E_WARNING => 'Warning',
+            E_PARSE => 'Parse Error',
+            E_NOTICE => 'Notice',
+            E_CORE_ERROR => 'Core Error',
+            E_CORE_WARNING => 'Core Warning',
+            E_COMPILE_ERROR => 'Compile Error',
+            E_COMPILE_WARNING => 'Compile Warning',
+            E_USER_ERROR => 'User Error',
+            E_USER_WARNING => 'User Warning',
+            E_USER_NOTICE => 'User Notice',
+            E_STRICT => 'Strict Notice',
+            E_RECOVERABLE_ERROR => 'Recoverable Error',
+            E_DEPRECATED => 'Deprecated',
+            E_USER_DEPRECATED => 'User Deprecated',
+            default => 'Unknown Error',
+        };
+    }
+    
+    private static function isFatal(int $errno): bool {
+        return in_array($errno, [
+            E_ERROR,
+            E_PARSE,
+            E_CORE_ERROR,
+            E_COMPILE_ERROR,
+            E_USER_ERROR
+        ]);
+    }
+    
+    private static function isDevMode(): bool {
+        return defined('ENVIRONMENT') && ENVIRONMENT === 'development';
+    }
+    
+    private static function displayDevError(Throwable $exception): void {
+        http_response_code(500);
+        echo '<div style="background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;">';
+        echo '<h3>' . get_class($exception) . '</h3>';
+        echo '<p><strong>Message:</strong> ' . htmlspecialchars($exception->getMessage()) . '</p>';
+        echo '<p><strong>File:</strong> ' . htmlspecialchars($exception->getFile()) . '</p>';
+        echo '<p><strong>Line:</strong> ' . $exception->getLine() . '</p>';
+        echo '<p><strong>Stack trace:</strong></p>';
+        echo '<pre>' . htmlspecialchars($exception->getTraceAsString()) . '</pre>';
+        echo '</div>';
+    }
+    
+    private static function displayProductionError(): void {
+        http_response_code(500);
+        echo '<div style="background-color: #ffdfdf; color: #990000; border: 1px solid #990000; padding: 10px;">';
+        echo '<h3>Application Error</h3>';
+        echo '<p>An unexpected error occurred. The site administrator has been notified.</p>';
+        echo '</div>';
     }
 }
 
-// Register shutdown function to catch fatal errors
-register_shutdown_function('fatalErrorHandler');
-?>
+// Initialize error handler
+ErrorHandler::init();

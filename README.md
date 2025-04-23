@@ -17,11 +17,16 @@ A modern PHP-based web application that allows you to store and share text onlin
 - User registration and profile management
 - Public and private paste options
 - Search by syntax and content
+- Secure session handling
+- CSRF protection
+- Modern input validation and sanitization
+- XSS prevention
+- Enhanced error handling
 
 ## Requirements
 
-- PHP >= 7.4
-- MySQL >= 5.7 or MariaDB >= 10.3
+- PHP >= 8.0
+- MySQL >= 8.0 or MariaDB >= 10.5
 - Modern web browser with JavaScript enabled
 - Cron-Job or Scheduled Task for automatic pruning
 
@@ -32,6 +37,20 @@ A modern PHP-based web application that allows you to store and share text onlin
 3. Edit `.htaccess` file if necessary for your server configuration
 4. Set up a cron job to run `/include/cronjob.php` at regular intervals
 5. Ensure proper file permissions
+6. Configure your web server with appropriate security headers
+
+## Security Features
+
+- Strict type declarations in PHP
+- Secure session management
+- CSRF token validation
+- Input sanitization and validation
+- Prepared SQL statements
+- Secure password hashing
+- XSS prevention
+- HTTP-only cookies
+- Secure cookie attributes
+- Content Security Policy support
 
 ## Alternative to Cron Jobs
 
@@ -61,6 +80,9 @@ This application implements several security measures:
 - Secure password hashing
 - XSS prevention
 - HTTPS encouraged for all resources
+- Secure session handling
+- HTTP-only cookies
+- SameSite cookie attributes
 
 ## Credits
 
@@ -68,6 +90,6 @@ PHP-Bin is maintained by Jeremy Stevens.
 Copyright 2014-2023 Jeremy Stevens.
 Licensed under GPL 2 (http://www.gnu.org/licenses/gpl.html)
 
-## Current Version: 2.0.0
+## Current Version: 2.1.0
 
 See CHANGELOG.md for the complete version history.

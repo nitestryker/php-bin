@@ -1,0 +1,43 @@
+[22-Apr-2025 21:28:13 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:28:13 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:28:15 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:28:15 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:28:16 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:28:16 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:30:22 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:30:22 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:30:24 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:30:24 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:30:27 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:30:27 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:33:32 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:33:32 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:33:33 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:33:33 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:33:35 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:33:35 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:35:01 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:35:01 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:35:02 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:35:02 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:35:04 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:35:04 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:37:01 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:37:01 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:39:13 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:39:13 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:39:15 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:39:15 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:40:16 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:40:16 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:42:08 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:42:08 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:42:10 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:42:10 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:42:11 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:42:11 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:45:43 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:45:43 America/Los_Angeles] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp2\htdocs\pb\classes\conn.class.php on line 14
+[22-Apr-2025 21:48:13 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:52:32 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[22-Apr-2025 21:52:43 America/Los_Angeles] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34

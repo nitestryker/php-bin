@@ -1,0 +1,7 @@
+[2025-04-22 19:26:48] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\pb\templates\main.tpl.php on line 33
+[2025-04-22 19:26:51] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\pb\templates\main.tpl.php on line 33
+[2025-04-22 19:26:55] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\pb\templates\main.tpl.php on line 33
+[2025-04-22 19:26:57] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp\htdocs\pb\templates\main.tpl.php on line 33
+[2025-04-22 21:04:00] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[2025-04-22 21:04:04] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34
+[2025-04-22 21:04:06] Notice: session_start(): Ignoring session_start() because a session is already active in C:\xampp2\htdocs\pb\templates\main.tpl.php on line 34

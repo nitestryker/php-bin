@@ -1,123 +1,118 @@
-
 <?php
+declare(strict_types=1);
+
 /**
  * Search Class
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 2.0.0
+ * @version 2.1.0-modern
  */
 
 class Search
 {
-    private $db;
-    private $config;
-    
+    private mysqli $db;
+    private array $config;
+
     /**
      * Constructor
      *
-     * @param mysqli $db Database connection
-     * @param array $config Configuration settings
+     * @param mysqli $db
+     * @param array $config
      */
-    public function __construct($db, $config)
+    public function __construct(mysqli $db, array $config)
     {
         $this->db = $db;
         $this->config = $config;
     }
-    
+
     /**
      * Search public posts
      *
-     * @param string $query Search query
-     * @param int $limit Number of posts to return
-     * @return array Search results
+     * @param string $query
+     * @param int $limit
+     * @return array
      */
-    public function searchPosts($query, $limit = 50)
+    public function searchPosts(string $query, int $limit = 50): array
     {
         $posts = [];
-        
-        if (empty($query)) {
+
+        if (empty(trim($query))) {
             return $posts;
         }
-        
+
         $searchTerm = '%' . $this->db->real_escape_string($query) . '%';
-        
+        $limit = max(1, $limit);
+
         $stmt = $this->db->prepare(
             "SELECT * FROM public_post 
-            WHERE (post_title LIKE ? OR post_text LIKE ?) 
-            AND viewable = 1 
-            ORDER BY post_date DESC 
-            LIMIT ?"
+             WHERE (post_title LIKE ? OR post_text LIKE ?) 
+             AND viewable = 1 
+             ORDER BY post_date DESC 
+             LIMIT ?"
         );
-        
-        $stmt->bind_param("ssi", $searchTerm, $searchTerm, $limit);
+
+        $stmt->bind_param('ssi', $searchTerm, $searchTerm, $limit);
         $stmt->execute();
+
         $result = $stmt->get_result();
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
         $stmt->close();
-        
         return $posts;
     }
-    
+
     /**
      * Search posts by syntax
      *
-     * @param string $syntax Syntax filter
-     * @param int $limit Number of posts to return
-     * @return array Filtered posts
+     * @param string $syntax
+     * @param int $limit
+     * @return array
      */
-    public function searchBySyntax($syntax, $limit = 50)
+    public function searchBySyntax(string $syntax, int $limit = 50): array
     {
         $posts = [];
-        
-        if (empty($syntax)) {
+
+        if (empty(trim($syntax))) {
             return $posts;
         }
-        
+
+        $limit = max(1, $limit);
         $stmt = $this->db->prepare(
             "SELECT * FROM public_post 
-            WHERE post_syntax = ? 
-            AND viewable = 1 
-            ORDER BY post_date DESC 
-            LIMIT ?"
+             WHERE post_syntax = ? 
+             AND viewable = 1 
+             ORDER BY post_date DESC 
+             LIMIT ?"
         );
-        
-        $stmt->bind_param("si", $syntax, $limit);
+
+        $stmt->bind_param('si', $syntax, $limit);
         $stmt->execute();
+
         $result = $stmt->get_result();
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
         $stmt->close();
-        
         return $posts;
     }
-    
+
     /**
      * Get available syntax options
      *
-     * @return array Syntax options
+     * @return array
      */
-    public function getSyntaxOptions()
+    public function getSyntaxOptions(): array
     {
         $syntaxOptions = [];
-        
+
         $query = "SELECT DISTINCT post_syntax FROM public_post WHERE viewable = 1 ORDER BY post_syntax";
         $result = $this->db->query($query);
-        
+
         if ($result) {
             while ($row = $result->fetch_assoc()) {
                 if (!empty($row['post_syntax'])) {
@@ -125,75 +120,68 @@ class Search
                 }
             }
         }
-        
+
         return $syntaxOptions;
     }
-    
+
     /**
-     * Search posts by user
+     * Search posts by username
      *
-     * @param string $username Username to search for
-     * @param int $limit Number of posts to return
-     * @return array User's posts
+     * @param string $username
+     * @param int $limit
+     * @return array
      */
-    public function searchByUser($username, $limit = 50)
+    public function searchByUser(string $username, int $limit = 50): array
     {
         $posts = [];
-        
-        if (empty($username)) {
+
+        if (empty(trim($username))) {
             return $posts;
         }
-        
+
+        $limit = max(1, $limit);
         $stmt = $this->db->prepare(
             "SELECT * FROM public_post 
-            WHERE posters_name = ? 
-            ORDER BY post_date DESC 
-            LIMIT ?"
+             WHERE posters_name = ? 
+             ORDER BY post_date DESC 
+             LIMIT ?"
         );
-        
-        $stmt->bind_param("si", $username, $limit);
+
+        $stmt->bind_param('si', $username, $limit);
         $stmt->execute();
+
         $result = $stmt->get_result();
-        
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $posts[] = $row;
-            }
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = $row;
         }
-        
+
         $stmt->close();
-        
         return $posts;
     }
-    
+
     /**
      * Format search results for display
      *
-     * @param array $posts Posts to format
-     * @return array Formatted posts
+     * @param array $posts
+     * @return array
      */
-    public function formatResults($posts)
+    public function formatResults(array $posts): array
     {
         $formattedPosts = [];
-        
+
         foreach ($posts as $post) {
-            // Format date
-            $date = new DateTime($post['post_date']);
-            $post['formatted_date'] = $date->format('Y-m-d H:i');
-            
-            // Truncate text preview
+            $post['formatted_date'] = (new DateTime($post['post_date']))->format('Y-m-d H:i');
+
             $textPreview = strip_tags($post['post_text']);
-            $post['text_preview'] = (strlen($textPreview) > 150) 
-                ? substr($textPreview, 0, 147) . '...' 
+            $post['text_preview'] = (strlen($textPreview) > 150)
+                ? mb_substr($textPreview, 0, 147) . '...'
                 : $textPreview;
-            
-            // Format post size
-            $post['formatted_size'] = number_format($post['post_size'], 2) . ' KB';
-            
+
+            $post['formatted_size'] = number_format((float) $post['post_size'], 2) . ' KB';
+
             $formattedPosts[] = $post;
         }
-        
+
         return $formattedPosts;
     }
 }
-?>

@@ -1,22 +1,21 @@
-
 <?php
+declare(strict_types=1);
+
 /**
  * Main Class
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 2.0.0
+ * @version 2.1.0-modern
  */
 
 class Main
 {
-    private $db;
-    private $config;
+    private mysqli $db;
+    private array $config;
 
-    public function __construct($db, $config)
+    public function __construct(mysqli $db, array $config)
     {
         $this->db = $db;
         $this->config = $config;
@@ -24,115 +23,118 @@ class Main
 
     /**
      * Clean and sanitize input
-     * 
-     * @param string $var Input to clean
-     * @return string Cleaned input
+     *
+     * @param string|null $var
+     * @return string
      */
-    public function clean($var = null)
+    public function clean(?string $var): string
     {
-        if ($var === null) {
-            return '';
-        }
-        
-        $var = htmlspecialchars($var, ENT_QUOTES, 'UTF-8');
-        $var = trim($var);
-        $var = strip_tags($var);
-        return $var;
+        return htmlspecialchars(trim(strip_tags($var ?? '')), ENT_QUOTES, 'UTF-8');
     }
 
     /**
      * Generate a random string
      *
-     * @param int $length Length of the random string
-     * @return string Random string
+     * @param int $length
+     * @return string
      */
-    public function generateRandomString($length = 10)
+    public function generateRandomString(int $length = 10): string
     {
-        $characters = "1234567890abcdefghijklmnopqrstuvwxyz";
+        $characters = '1234567890abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
         $randomString = '';
-        
+
         for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[random_int(0, strlen($characters) - 1)];
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
         }
-        
+
         return $randomString;
     }
 
     /**
      * Get client IP address
      *
-     * @return string IP address
+     * @return string
      */
-    public function getIp()
+    public function getIp(): string
     {
-        // Check for forwarded IP
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && 
-            filter_var($_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP)) {
-            return $_SERVER['HTTP_X_FORWARDED_FOR'];
+        $ipSources = [
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR'
+        ];
+
+        foreach ($ipSources as $key) {
+            if (!empty($_SERVER[$key]) && filter_var($_SERVER[$key], FILTER_VALIDATE_IP)) {
+                return $_SERVER[$key];
+            }
         }
-        
-        // Check for client IP
-        if (!empty($_SERVER['HTTP_CLIENT_IP']) && 
-            filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP)) {
-            return $_SERVER['HTTP_CLIENT_IP'];
-        }
-        
-        // Default to remote address
-        return $_SERVER['REMOTE_ADDR'];
+
+        return '0.0.0.0';
     }
 
     /**
      * Create a short link using Bit.ly
      *
-     * @param string $url The URL to shorten
-     * @param string $format Output format
-     * @return string Shortened URL
+     * @param string $url
+     * @param string $format
+     * @return string
      */
-    public function shortLink($url, $format = 'txt')
+    public function shortLink(string $url, string $format = 'txt'): string
     {
-        $login = $this->config['bitly_username'];
-        $apiKey = $this->config['bitly_api'];
-        
-        if (empty($login) || empty($apiKey)) {
+        $login = $this->config['bitly_username'] ?? '';
+        $apiKey = $this->config['bitly_api'] ?? '';
+
+        if ($login === '' || $apiKey === '') {
             return '';
         }
-        
-        $connectURL = 'https://api-ssl.bitly.com/v3/shorten?login=' . $login . 
-                      '&apiKey=' . $apiKey . '&uri=' . urlencode($url) . 
-                      '&format=' . $format;
-                      
+
+        $connectURL = sprintf(
+            'https://api-ssl.bitly.com/v3/shorten?login=%s&apiKey=%s&uri=%s&format=%s',
+            urlencode($login),
+            urlencode($apiKey),
+            urlencode($url),
+            urlencode($format)
+        );
+
         return $this->curlGetResult($connectURL);
     }
-    
+
     /**
      * Fetch URL content using cURL
      *
-     * @param string $url URL to fetch
-     * @return string Response
+     * @param string $url
+     * @return string
      */
-    private function curlGetResult($url)
+    private function curlGetResult(string $url): string
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+
         $data = curl_exec($ch);
         curl_close($ch);
-        return $data;
+
+        return $data ?: '';
     }
-    
+
     /**
      * Format date/time
      *
-     * @param string $dateTime Date/time string
-     * @param string $format Output format
-     * @return string Formatted date/time
+     * @param string $dateTime
+     * @param string $format
+     * @return string
      */
-    public function formatDateTime($dateTime, $format = 'Y-m-d H:i:s')
+    public function formatDateTime(string $dateTime, string $format = 'Y-m-d H:i:s'): string
     {
-        $dt = new DateTime($dateTime);
-        return $dt->format($format);
+        try {
+            $dt = new DateTime($dateTime);
+            return $dt->format($format);
+        } catch (Exception $e) {
+            return $dateTime; // fallback in case of invalid date
+        }
     }
 }
-?>

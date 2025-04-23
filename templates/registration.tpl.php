@@ -1,31 +1,49 @@
 <?php
+declare(strict_types=1);
+
 /**
- * registration.tpl.php
- *
+ * Registration Template
  * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
+ * @version 2.0.0
  */
+
 require_once 'include/config.php';
-session_start();
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    $uid = $_SESSION['uid'];
-    $user = $_SESSION['username'];
-    $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='index.php?action=logout'>logout</a>";
-    $uname = $_SESSION['username'];
+
+// Start session with strict security settings
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => true,
+    'cookie_samesite' => 'Strict',
+    'use_strict_mode' => true
+]);
+
+// Initialize variables
+$form = '';
+$uname = '';
+$uid = null;
+$user = '';
+
+// Handle logged in state
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    $uid = $_SESSION['uid'] ?? null;
+    $user = $_SESSION['username'] ?? '';
+    $uname = $user;
+
+    $form = sprintf(
+        'Welcome <a href="u/%s">%s</a>&nbsp;<a href="index.php?action=logout">logout</a>',
+        htmlspecialchars($user, ENT_QUOTES),
+        htmlspecialchars($_SESSION['username'] ?? '', ENT_QUOTES)
+    );
 } else {
-    $form = "<input class='span2' type='text' name='username' placeholder='User name'>";
-    $form .= "<input class='span2' type='password' name='password' placeholder='Password'>";
-    $form .= "<input type='submit' name='submit' value='Login' class='btn'/>";
-    $form .= "</form>";
-    $form .= "<ul class='nav pull-right'>";
-    $form .= "<li><a href='register.php'>Registration</a></li>";
+    $form = <<<HTML
+        <input class="span2" type="text" name="username" placeholder="User name">
+        <input class="span2" type="password" name="password" placeholder="Password">
+        <input type="submit" name="submit" value="Login" class="btn"/>
+        </form>
+        <ul class="nav pull-right">
+        <li><a href="register.php">Registration</a></li>
+HTML;
 }
-include_once 'include/config.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,70 +1,83 @@
 <?php
+declare(strict_types=1);
+
 /**
  * index.php
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
+ * @version 2.0.0
 */
 
+@ini_set('display_errors', '1');
+@ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 
 // Use improved session management
 require_once 'include/session.php';
+require_once 'include/config.php';
+require_once 'classes/post.class.php';
 
-// Error reporting is now handled in config.php
-$action = (isset($_GET['action'])) ? $_GET['action'] : "null";
-if ($action == "post") {
-    include_once 'classes/post.class.php';
-    include_once 'include/config.php';
-    $check = new post();
-    $results = $check->logincheck();
+// Get and validate action parameter
+$action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? 'null';
 
-    // switch based on reg users or guest
-    switch ($results) {
+if ($action === 'post') {
+    try {
+        $postHandler = new Post();
+        $userType = $postHandler->loginCheck();
 
-        case "user":
+        switch ($userType) {
+            case 'user':
+                // Handle registered user post
+                $connection = getDbConnection();
+                $postId = $postHandler->RegUser();
+                $_SESSION['postid'] = $postId;
+                $postHandler->redirect();
+                break;
 
-            // make a connection to the database
-            include 'include/config.php';
-            $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-                or die ("Couldn't connect to server.");
-            $db = mysql_select_db("$database_name", $connection)
-                or die("Couldn't select database.");
+            case 'guest':
+                // Handle guest post
+                $connection = getDbConnection();
+                $postId = $postHandler->Guest();
+                $_SESSION['postid'] = $postId;
+                $postHandler->redirect();
+                break;
 
-            // create a new post for registered users
-            $cmd = new post();
-            $cmd->RegUser();
-            $rd = new post();
-            $post_id = $_SESSION['postid'];
-            $rd = new post();
-            $rd->redirect();
-            break;
-
-        case "guest":
-
-            // make a connection to the database
-            include 'include/config.php';
-            $post_id = $_SESSION['postid'];
-
-            $connection = mysql_connect("$dbhost", "$dbusername", "$dbpasswd")
-                or die ("Couldn't connect to server.");
-            $db = mysql_select_db("$database_name", $connection)
-                or die("Couldn't select database.");
-
-            // create new post & post as guest
-            $cmd = new post();
-            $cmd->Guest();
-            $rd = new post();
-            $rd->redirect();
-
-
+            default:
+                throw new RuntimeException('Invalid user type');
+        }
+    } catch (Exception $e) {
+        error_log("Post error: " . $e->getMessage());
+        header('Location: error.php?msg=' . urlencode('An error occurred while processing your post'));
+        exit;
     }
-
-
 }
 
-include_once 'templates/main.tpl.php';
-?>
+/**
+ * Get database connection
+ * @return PDO Database connection
+ * @throws RuntimeException if connection fails
+ */
+function getDbConnection(): PDO 
+{
+    global $dbhost, $dbusername, $dbpasswd, $database_name;
+    
+    try {
+        $dsn = "mysql:host=$dbhost;dbname=$database_name;charset=utf8mb4";
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        
+        return new PDO($dsn, $dbusername, $dbpasswd, $options);
+    } catch (PDOException $e) {
+        error_log("Database connection failed: " . $e->getMessage());
+        throw new RuntimeException("Could not connect to database");
+    }
+}
+
+// Include main template
+require_once 'templates/main.tpl.php';

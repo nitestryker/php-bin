@@ -1,42 +1,64 @@
 <?php
+declare(strict_types=1);
+
 /**
- * search.tpl.php
- *
+ * Search Template
  * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
+ * @version 2.0.0
  */
 
-// display results;
-include 'include/config.php';
+require_once 'include/config.php';
 
-session_start();
+// Start session with strict security settings
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => true,
+    'cookie_samesite' => 'Strict',
+    'use_strict_mode' => true
+]);
 
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    $uid = $_SESSION['uid'];
-    $user = $_SESSION['username'];
-    $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='logout.php'>logout</a>";
-    $uname = $_SESSION['username'];  
+// Initialize variables
+$form = '';
+$uname = '';
+$uid = null;
+$user = '';
+
+// Handle logged in state
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    $uid = $_SESSION['uid'] ?? null;
+    $user = $_SESSION['username'] ?? '';
+    $uname = $user;
+
+    $form = sprintf(
+        'Welcome <a href="u/%s">%s</a>&nbsp;<a href="logout.php">logout</a>',
+        htmlspecialchars($user, ENT_QUOTES),
+        htmlspecialchars($_SESSION['username'] ?? '', ENT_QUOTES)
+    );
 } else {
-    $form = "<input type='hidden' name='login'>";
-    $form .= "<input class='span2' type='text' name='username' placeholder='User name'>";
-    $form .= "<input class='span2' type='password' name='password' placeholder='Password'>";
-    $form .= "<input type='submit' name='submit' value='Login' class='btn'/>";
-    $form .= "</form>";
-    $form .= "<ul class='nav pull-right'>";
-    $form .= "<li><a href='register.php'>Registration</a></li>";
-}
-include_once 'include/config.php';
-include_once 'classes/conn.class.php';
-if (isset($_POST['submit'])) {
-    $cmd = new Conn();
-    $cmd->login($_POST['username'], $_POST['password']);
+    $form = <<<HTML
+        <input type="hidden" name="login">
+        <input class="span2" type="text" name="username" placeholder="User name">
+        <input class="span2" type="password" name="password" placeholder="Password">
+        <input type="submit" name="submit" value="Login" class="btn"/>
+        </form>
+        <ul class="nav pull-right">
+        <li><a href="register.php">Registration</a></li>
+HTML;
 }
 
+// Handle login submission
+if (isset($_POST['submit'])) {
+    try {
+        require_once 'classes/conn.class.php';
+        $cmd = new Conn();
+        $cmd->login(
+            $_POST['username'] ?? '',
+            $_POST['password'] ?? ''
+        );
+    } catch (Exception $e) {
+        error_log("Login error: " . $e->getMessage());
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -82,7 +104,7 @@ if (isset($_POST['submit'])) {
     };
 
     //This line is the only change made based on provided snippet
-    document.addEventListener('DOMContentLoaded', resizeIt); 
+    document.addEventListener('DOMContentLoaded', resizeIt);
     resizeIt(); //initial on load
 </script>
 

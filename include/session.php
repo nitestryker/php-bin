@@ -1,4 +1,3 @@
-
 <?php
 /**
  * session.php - Secure Session Handling

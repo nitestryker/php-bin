@@ -1,99 +1,66 @@
-
 <?php
+declare(strict_types=1);
+
 /**
- * Database Connection File
+ * Database Connection Handler
  * 
  * @package PHP-Bin
- * @version 2.0.0
+ * @version 2.1.0
  */
 
-// Include configuration
-require_once 'config.php';
+class Database {
+    private static ?mysqli $connection = null;
+    private static array $config;
 
-// Create database connection using MySQLi
-$connection = mysqli_connect($dbhost, $dbusername, $dbpasswd, $database_name);
+    public static function init(array $config): void {
+        self::$config = $config;
+    }
 
-// Check connection
-if (mysqli_connect_errno()) {
-    $error_message = "Failed to connect to MySQL: " . mysqli_connect_error();
-    
-    // Log error
-    error_log($error_message);
-    
-    // Display error message if display_errors is enabled
-    if ($display_errors) {
-        die($error_message);
-    } else {
-        die("Database connection error. Please check the error logs or contact the administrator.");
+    public static function getConnection(): mysqli {
+        if (self::$connection === null) {
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+            try {
+                self::$connection = new mysqli(
+                    self::$config['dbhost'],
+                    self::$config['dbusername'],
+                    self::$config['dbpasswd'],
+                    self::$config['database_name']
+                );
+
+                self::$connection->set_charset('utf8mb4');
+            } catch (mysqli_sql_exception $e) {
+                error_log("Database connection failed: " . $e->getMessage());
+                throw new RuntimeException('Database connection failed');
+            }
+        }
+
+        return self::$connection;
+    }
+
+    public static function query(string $query): mysqli_result|bool {
+        return self::getConnection()->query($query);
+    }
+
+    public static function prepare(string $query): mysqli_stmt {
+        return self::getConnection()->prepare($query);
+    }
+
+    public static function escape(string $string): string {
+        return self::getConnection()->real_escape_string($string);
+    }
+
+    public static function close(): void {
+        if (self::$connection instanceof mysqli) {
+            self::$connection->close();
+            self::$connection = null;
+        }
     }
 }
 
-// Set charset
-mysqli_set_charset($connection, "utf8mb4");
+// Initialize with config
+require_once __DIR__ . '/config.php';
+Database::init($config);
 
-// Common database functions
-function db_query($query) {
-    global $connection;
-    $result = mysqli_query($connection, $query);
-    
-    if (!$result) {
-        error_log("Database query error: " . mysqli_error($connection));
-    }
-    
-    return $result;
-}
-
-function db_fetch_assoc($result) {
-    return mysqli_fetch_assoc($result);
-}
-
-function db_fetch_array($result) {
-    return mysqli_fetch_array($result);
-}
-
-function db_num_rows($result) {
-    return mysqli_num_rows($result);
-}
-
-function db_affected_rows() {
-    global $connection;
-    return mysqli_affected_rows($connection);
-}
-
-function db_insert_id() {
-    global $connection;
-    return mysqli_insert_id($connection);
-}
-
-function db_escape($string) {
-    global $connection;
-    return mysqli_real_escape_string($connection, $string);
-}
-
-function db_close() {
-    global $connection;
-    mysqli_close($connection);
-}
-
-// Prepared statement functions
-function db_prepare($query) {
-    global $connection;
-    return mysqli_prepare($connection, $query);
-}
-
-function db_stmt_bind_param($stmt, $types, ...$params) {
-    return mysqli_stmt_bind_param($stmt, $types, ...$params);
-}
-
-function db_stmt_execute($stmt) {
-    return mysqli_stmt_execute($stmt);
-}
-
-function db_stmt_get_result($stmt) {
-    return mysqli_stmt_get_result($stmt);
-}
-
-function db_stmt_close($stmt) {
-    return mysqli_stmt_close($stmt);
-}
-?>
+// Register shutdown function
+register_shutdown_function([Database::class, 'close']);
