@@ -1,25 +1,32 @@
 Options +FollowSymLinks
-RewriteEngine ON 
-RewriteCond %{HTTP_HOST} ^127.0.0.1
+RewriteEngine On
+RewriteBase /pb/
+
+# Prevent redirecting actual files
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule (.*) http://www.yoursite.com/pb/post.php?pid=$1 [R=301,L]
-# raw format
-RewriteRule ^raw/([^/.]+)/?$  /pb/raw/raw.php?rid=$1 [L]
-# embed a post with javascript
-RewriteRule ^embed/([^/.]+)/?$  /pb/embed/embed_js.php?rid=$1 [L]
-# print post
-RewriteRule ^print/([^/.]+)/?$  /pb/print/print.php?rid=$1 [L]
-# users profiles
-RewriteRule ^u/([^/.]+)/?$  /pb/u/profile.php?usr=$1 [L]
-# Search archive by Syntax
-RewriteRule ^archive/([^/.]+)/?$  /pb/archive/searcharchive.php?syntax=$1 [L]
-#edit profile
-RewriteRule ^u/edit/([^/.]+)/?$  /pb/u/edit/profile.php?usr=$1 [L]
-#index
-RewriteRule ^([a-zA-Z0-9]+)/$ /pb/index.php?action=$1
-#post 
-RewriteRule ^([a-z][A-z]*)?$ /pb/post.php?pid=$1 [L]
-RewriteRule ^([0-9][0-9]*)?$ /pb/post.php?pid=$1 [L]
+RewriteCond %{REQUEST_FILENAME} !-d
 
+# Raw format
+RewriteRule ^raw/([^/]+)/?$ raw/raw.php?rid=$1 [L]
 
+# Embed a post with JavaScript
+RewriteRule ^embed/([^/]+)/?$ embed/embed_js.php?rid=$1 [L]
 
+# Print post
+RewriteRule ^print/([^/]+)/?$ print/print.php?rid=$1 [L]
+
+# User profiles
+RewriteRule ^u/([^/]+)/?$ u/profile.php?usr=$1 [L]
+
+# Edit profile
+RewriteRule ^u/edit/([^/]+)/?$ u/edit/profile.php?usr=$1 [L]
+
+# Search archive by syntax
+RewriteRule ^archive/([^/]+)/?$ archive/searcharchive.php?syntax=$1 [L]
+
+# Index alias (action handling)
+RewriteRule ^([a-zA-Z0-9]+)/?$ index.php?action=$1 [L]
+
+# Post routes
+RewriteRule ^([a-zA-Z]+)?$ post.php?pid=$1 [L]
+RewriteRule ^([0-9]+)?$ post.php?pid=$1 [L]

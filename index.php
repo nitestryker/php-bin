@@ -1,4 +1,3 @@
-
 <?php
 declare(strict_types=1);
 
@@ -11,6 +10,10 @@ declare(strict_types=1);
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @version 2.0.0
 */
+
+@ini_set('display_errors', '1');
+@ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 
 // Use improved session management
 require_once 'include/session.php';

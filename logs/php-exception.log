@@ -1,0 +1,3 @@
+[2025-04-22 19:25:34] Uncaught ParseError: syntax error, unexpected token "as", expecting "," or ";" in C:\xampp\htdocs\pb\classes\post.class.php on line 23
+Stack trace:
+#0 {main}

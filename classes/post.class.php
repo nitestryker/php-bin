@@ -18,13 +18,13 @@ class Post
     private array $config;
     private ?Main $main;
 
-    public function __construct(?mysqli $db = null, ?array $config = null, ?Main $main = null) 
+    public function __construct(?mysqli $db = null, ?array $overrideConfig = null, ?Main $main = null)
     {
-        global $connection, $config as $globalConfig;
-
+        global $connection, $config;
+    
         $this->db = $db ?? $connection;
-        $this->config = $config ?? $globalConfig;
-
+        $this->config = $overrideConfig ?? $config;
+    
         if ($main === null && class_exists('Main')) {
             $this->main = new Main($this->db, $this->config);
         } else {

@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Live.php
