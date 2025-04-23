@@ -1,152 +1,126 @@
-
 <?php
+declare(strict_types=1);
+
 /**
  * post.php
  *
  * @package PHP-Bin
- * @author Jeremy Stevens (original), Updated 2023
+ * @author Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
  * @version 2.0.0
- *  
- *     V2.0.0 Changes 
- *     - Modernized PHP code
- *     - Added security features
- *     - Replaced deprecated mysql functions with mysqli
- *    
-*/
+ */
 
 // Error handling
 error_reporting(E_ALL);
-ini_set('display_errors', 0);
+ini_set('display_errors', '0');
 
-// Include session management
+// Include required files
 require_once 'include/session.php';
-
-// Process post action if requested
-$action = (isset($_GET['action'])) ? $_GET['action'] : "null";
-if ($action == "post") {
-    include_once 'classes/post.class.php';
-    include_once 'include/config.php';
-    $check = new post();
-    $results = $check->logincheck();
-     
-    // Switch based on reg users or guest
-    switch ($results) {
-        case "user":
-            // Include the database connection
-            include_once 'include/db.php';
-            
-            // Create a new post for registered users
-            $cmd = new post();
-            $cmd->RegUser();
-            $post_id = $_SESSION['postid'];
-            $rd = new post();
-            $rd->redirect();
-            break;
-          
-        case "guest":
-            // Include the database connection
-            include_once 'include/db.php';
-            $post_id = $_SESSION['postid'];
-
-            // Create new post & post as guest
-            $cmd = new post();
-            $cmd->Guest();
-            $rd = new post();
-            $rd->redirect();
-    }
-}
-
-// Process viewing a post
+require_once 'include/config.php';
 require_once 'classes/post.class.php';
 
-// Get the post id number
-$pid = isset($_GET['pid']) ? (int)$_GET['pid'] : 0;
-if ($pid <= 0) {
-    // Handle invalid post ID
-    header("Location: index.php");
+try {
+    // Process post action if requested
+    $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? 'null';
+
+    if ($action === 'post') {
+        $postHandler = new Post();
+        $userType = $postHandler->loginCheck();
+
+        switch ($userType) {
+            case 'user':
+                // Create a new post for registered users
+                $postId = $postHandler->regUserPost();
+                if ($postId === false) {
+                    throw new RuntimeException('Failed to create user post');
+                }
+                $_SESSION['postid'] = $postId;
+                $postHandler->redirect();
+                break;
+
+            case 'guest':
+                // Create new post for guest
+                $postId = $postHandler->guestPost();
+                if ($postId === false) {
+                    throw new RuntimeException('Failed to create guest post');
+                }
+                $_SESSION['postid'] = $postId;
+                $postHandler->redirect();
+                break;
+
+            default:
+                throw new RuntimeException('Invalid user type');
+        }
+    }
+
+    // Process viewing a post
+    $pid = filter_input(INPUT_GET, 'pid', FILTER_SANITIZE_NUMBER_INT);
+    if (!$pid) {
+        header('Location: index.php', true, 303);
+        exit;
+    }
+
+    $_SESSION['pdel'] = $pid;
+
+    // Create post object and get post data
+    $postHandler = new Post();
+    $postData = $postHandler->getPost($pid);
+
+    if (!$postData) {
+        throw new RuntimeException('Post not found');
+    }
+
+    // Extract post data
+    $post_id = $postData['postid'];
+    $_SESSION['post_id'] = $post_id;
+
+    $posters_name = $postData['posters_name'];
+    $imagesrc = "include/avatar.php?uimage=" . urlencode($posters_name);
+
+    $post_title = htmlspecialchars($postData['post_title'], ENT_QUOTES, 'UTF-8');
+    $post_syntax = htmlspecialchars($postData['post_syntax'], ENT_QUOTES, 'UTF-8');
+    $post_exp = $postData['exp_int'];
+    $post_text = $postData['post_text'];
+    $post_date = $postData['post_date'];
+    $post_size = $postData['post_size'];
+    $post_hits = $postData['post_hits'] ?? 0;
+    $bitly = $postData['bitly'];
+
+    // Format bitly link
+    $link_title = empty($bitly) ? "" : "&nbsp; Short Link: ";
+    $bitly = empty($bitly) ? null : "<a href='" . htmlspecialchars($bitly, ENT_QUOTES, 'UTF-8') . "'>" . 
+            htmlspecialchars($bitly, ENT_QUOTES, 'UTF-8') . "</a>";
+
+    // Update view counts
+    if (isset($_SESSION['reguser']) && $_SESSION['reguser'] === "1") {
+        // Update total hit count for registered users
+        $uid = $postHandler->getuid($posters_name);
+        if ($uid) {
+            $postHandler->updateUsrhits($uid);
+        }
+    }
+
+    // Format the date
+    $fdate = date('F j, Y', strtotime($post_date));
+
+    // Set expiration text
+    $expires = match($post_exp) {
+        "0" => "never",
+        "1" => "10 mins",
+        "2" => "1 hour",
+        "3" => "1 day",
+        "4" => "1 month",
+        default => "unknown"
+    };
+
+    // Include template
+    require_once 'templates/post.tpl.php';
+
+} catch (Exception $e) {
+    error_log("Post error: " . $e->getMessage());
+    header('Location: include/error.php?msg=' . urlencode($e->getMessage()));
     exit;
 }
 
-$_SESSION['pdel'] = $pid;
-
-// Include database connection
-include_once 'include/db.php';
-
-// Create post object and get post data
-$post = new post();
-$post->getPost($pid);
-
-// Get post data
-$id = $post->id;
-$post_id = $post->post_id;
-$_SESSION['post_id'] = $post_id;
-
-$posters_name = $post->posters_name;
-if ($posters_name == "guest") {
-    $imagesrc = "include/avatar.php?uimage=$posters_name";
-} else {
-    $imagesrc = "include/avatar.php?uimage=$posters_name";
-}
-$post_title = $post->post_title;
-$post_syntax = $post->post_syntax;
-$post_exp = $post->exp_int;
-$post_text = $post->post_text;
-$post_date = $post->post_date;
-$post_size = $post->post_size;
-$post_hits = $post->post_hits ?? 0;
-
-$namelink = $post->namelink;
-$bitly = $post->bitly;
-
-// If bitly is not empty show shortened link
-if (empty($bitly)) {
-    $link_title = "";
-    $bitly = null;
-} else {
-    $link_title = "&nbsp; Short Link: ";
-    $bitly = "<a href='" . htmlspecialchars($bitly, ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($bitly, ENT_QUOTES, 'UTF-8') . "</a>";
-}
-
-// Update view counts
-$post->hits();
-
-// If the user is a registered user update hit total count
-$regbool = $_SESSION['reguser'] ?? 0;
-if ($regbool == "1") {
-    // Update total hit count
-    $post->totalHits();
-    
-    // Get user ID and update user hits
-    $uid = $post->getuid($posters_name);
-    $post->updateUsrhits($uid);
-}
-
-// Format the date
-$fdate = date('F j, Y', strtotime($post_date));
-
-// Set expiration text
-switch ($post_exp) {
-    case "0":
-        $expires = "never";
-        break;
-    case "1":
-        $expires = "10 mins";
-        break;
-    case "2":
-        $expires = "1 hour";
-        break;
-    case "3":
-        $expires = "1 day";
-        break;
-    case "4":
-        $expires = "1 month";
-        break;
-    default:
-        $expires = "unknown";
-}
-
-// Include template
-include_once 'templates/post.tpl.php';
 ?>

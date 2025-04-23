@@ -2,10 +2,13 @@
     "name": "jeremystevens/phpbin",
     "description": "A PHP Pastebin Clone",
     "require": {
-        "ext-mysql": "~1.0"
+        "php": ">=8.0",
+        "ext-pdo": "*",
+        "ext-mysqli": "*"
     },
     "require-dev": {
-        "ext-mysql": "~1.0"
+        "ext-pdo": "*",
+        "ext-mysqli": "*"
     },
     "license": "GPL",
     "authors": [

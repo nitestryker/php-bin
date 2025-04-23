@@ -1,6 +1,19 @@
 
 # Changelog
 
+### V2.1.0 (December 2023)
+
+    + Modernized PHP files with strict types and improved security
+    + Enhanced session security with strict settings across all files
+    + Updated logout process with secure cookie handling
+    + Improved error handling and input validation
+    + Added CSRF protection to forms
+    + Updated Travis CI configuration for PHP 8.x support
+    + Modernized template structure and security
+    + Enhanced search functionality with better sanitization
+    + Improved user authentication security
+    + Updated file processing and handling
+
 ### V2.0.0 (July 2023)
 
     + Upgraded to PHP 7.4+ compatibility

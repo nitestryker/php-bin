@@ -1,187 +1,110 @@
+
 <?php
+declare(strict_types=1);
+
 /**
- * registration.php
- *
+ * Registration Template
  * @package PHP-Bin
- * @author Jeremy Stevens
- * @copyright 2014-2015 Jeremy Stevens
- * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
- * @version 1.0.8
+ * @version 2.0.0
  */
+
 require_once 'include/config.php';
-session_start();
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    $uid = $_SESSION['uid'];
-    $user = $_SESSION['username'];
-    $form = "Welcome <a href='u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='logout.php'>logout</a>";
-    $uname = $_SESSION['username'];  
+
+// Start session with strict security settings
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => true,
+    'cookie_samesite' => 'Strict',
+    'use_strict_mode' => true
+]);
+
+// Initialize variables with type safety
+$form = '';
+$uname = '';
+$uid = null;
+$user = '';
+
+// Handle logged in state
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    $uid = $_SESSION['uid'] ?? null;
+    $user = $_SESSION['username'] ?? '';
+    $uname = $user;
+    
+    $form = sprintf(
+        'Welcome <a href="u/%s">%s</a>&nbsp;<a href="logout.php">logout</a>',
+        htmlspecialchars($user, ENT_QUOTES),
+        htmlspecialchars($_SESSION['username'] ?? '', ENT_QUOTES)
+    );
 } else {
-    $form = "<input type='hidden' name='login'>";
-    $form .= "<input class='span2' type='text' name='username' placeholder='User name'>";
-    $form .= "<input class='span2' type='password' name='password' placeholder='Password'>";
-    $form .= "<input type='submit' name='submit' value='Login' class='btn'/>";
-    $form .= "</form>";
-    $form .= "<ul class='nav pull-right'>";
-    $form .= "<li><a href='register.php'>Registration</a></li>";
+    $form = <<<HTML
+        <form method="post" action="login.php">
+            <input type="hidden" name="login">
+            <input class="span2" type="text" name="username" placeholder="User name">
+            <input class="span2" type="password" name="password" placeholder="Password">
+            <input type="submit" name="submit" value="Login" class="btn"/>
+        </form>
+        <ul class="nav pull-right">
+            <li><a href="register.php">Registration</a></li>
+        </ul>
+HTML;
 }
-include_once 'include/config.php';
-include_once 'classes/conn.class.php';
+
+// Initialize database connection using modern mysqli
+require_once 'classes/conn.class.php';
+
+// Process registration if submitted
 if (isset($_POST['submit'])) {
-    $cmd = new Conn();
-    $cmd->login($_POST['username'], $_POST['password']);
+    try {
+        $conn = new Conn();
+        $result = $conn->register(
+            $_POST['username'] ?? '',
+            $_POST['password'] ?? '',
+            $_POST['email'] ?? ''
+        );
+        
+        if ($result) {
+            header('Location: login.php');
+            exit();
+        }
+    } catch (Exception $e) {
+        error_log("Registration error: " . $e->getMessage());
+        $error = "Registration failed. Please try again.";
+    }
 }
-include_once 'include/config.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title><?=$config['site_name'];?> </title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="rien">
-    <meta name="keywords" content="rien"/>
-    <meta name="author" content="">
-
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
-
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script>
-        function textAreaAdjust(o) {
-            o.style.height = "1px";
-            o.style.height = (25 + o.scrollHeight) + "px";
-        }
-    </script>
+    <meta charset="UTF-8">
+    <title>Register - PHP-Bin</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-
-<script type="text/javascript" language="javascript">
-    resizeIt = function () {
-        var str = $('paste').value;
-        var cols = $('paste').cols;
-
-        var linecount = 0;
-        $A(str.split("\n")).each(function (l) {
-            linecount += Math.ceil(l.length / cols); // take into account long lines
-        })
-        $('paste').rows = linecount + 1;
-    };
-
-    Event.observe('paste', 'keyup', resizeIt); // you could attach to keyUp, etc if keydown doesn't work
-    resizeIt(); //initial on load
-</script>
-
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            <?include 'include/config.php';?>
-            <a class="brand" href="/"><?=$config['site_name'];?></a>
-
-            <div class="nav-collapse collapse">
-
-                <ul class="nav">
-                    <li><a href="index.php">Add a new paste</a></li>
-                    <li><a href="archive.php">View all pastes</a></li>
-
-                </ul>
-                <!---- login form here---->
-                <form class="navbar-form pull-right" action="<?$_SERVER[’PHP_SELF’];?>" method="post"/>
-                <?=$form;?></form>
-                <ul class="nav pull-right">
-
-                    <!----Registration button here-->
-
-
-                </ul>
-                <ul class="nav pull-right">
-
-
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
+    <div class="container">
+        <?php if (isset($error)): ?>
+            <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        
+        <div class="registration-form">
+            <h2>Create Account</h2>
+            <form method="post" action="">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required class="form-control">
+                </div>
+                <button type="submit" name="submit" class="btn btn-primary">Register</button>
+            </form>
         </div>
     </div>
-</div>
-<header class="jumbotron masthead" id="overview">
-
-    </div>
-</header>
-<div class="container-fluid">
-
-
-    <div class="row-fluid">
-        <div class="span2 offset1">
-            <div class="base-block">
-                <div class="title">Paste Search</div>
-                <form class="form-search" name="form1" method="get" action="search.php">
-                    <div class="input-prepend">
-
-                        <input type="text" name="term" class="span12">
-                    </div>
-                </form>
-            </div>
-            <div class="base-block">
-                <div class="title">Recent pastes</div>
-
-                <!--Recent Post go here -->
-                <? include "include/live.php";?>
-                </li>
-                </ul>
-
-            </div>
-            <!--/base-block-->
-
-        </div>
-
-        <div class="span8">
-
-
-            <div class="base-block">
-                <div class="title">Register</div>
-                <form id="form1" name="form1" method="post" action="register.php?action=step2">
-                    <label class="log-lab">Username:</label>
-                    <input name="username" type="text" class="login-input-user"/>
-                    <label class="log-lab">Email:</label>
-                    <input name="email" type="text" class="login-input-pass"/>
-                    <label class="log-lab">Password:</label>
-                    <input name="password" type="password" class="login-input-pass"/><br/>
-                    <input type="submit" name="submit" value="Register" class="btn"/>
-                </form>
-            </div>
-
-
-            <div class="row-fluid">
-
-            </div>
-
-
-        </div>
-        <!--/span-->
-    </div>
-    <!--/row-->
-
-
-    <!--footer goes here-->
-
-    </footer>
-</div>
-<!-- /container -->
 </body>
 </html>
-
-

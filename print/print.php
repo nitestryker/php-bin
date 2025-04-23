@@ -1,64 +1,83 @@
 
 <?php
+declare(strict_types=1);
+
 /**
  * Print Page
  *
  * @package PHP-Bin
  * @author Jeremy Stevens
- * @copyright 2014-2023 Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens 
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
- *
  * @version 2.0.0
  */
 
-// Include required files
-require_once '../include/config.php';
-require_once '../include/db.php';
-require_once '../include/session.php';
-require_once '../classes/conn.class.php';
-require_once '../include/geshi.php';
+// Set security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Content-Security-Policy: default-src \'self\'; script-src \'self\' \'unsafe-inline\'; style-src \'self\' \'unsafe-inline\'');
 
-// Initialize connection
-$conn = new Conn($mysqli, $config);
+try {
+    require_once '../include/config.php';
+    require_once '../include/db.php';
+    require_once '../classes/conn.class.php';
+    require_once '../include/geshi.php';
 
-// Validate the post ID
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($id <= 0) {
-    die('Invalid post ID');
-}
+    // Initialize database connection
+    $conn = new DatabaseConnection($config);
 
-// Get the post data
-$stmt = $conn->db->prepare("SELECT * FROM public_post WHERE post_id = ?");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result && $row = $result->fetch_assoc()) {
-    // Check if post is viewable
-    if ($row['viewable'] != 1) {
-        die('This paste is not viewable');
+    // Validate and sanitize post ID
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if (!$id || $id <= 0) {
+        throw new InvalidArgumentException('Invalid post ID');
     }
-    
-    $title = !empty($row['post_title']) ? htmlspecialchars($row['post_title'], ENT_QUOTES, 'UTF-8') : 'Untitled';
+
+    // Prepare and execute query with parameterized statement
+    $stmt = $conn->prepare("SELECT * FROM public_post WHERE postid = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if (!$result || !($row = $result->fetch_assoc())) {
+        throw new RuntimeException('Post not found');
+    }
+
+    // Verify post is viewable
+    if ($row['viewable'] !== 1) {
+        throw new RuntimeException('This paste is not viewable');
+    }
+
+    // Process post data
+    $title = htmlspecialchars($row['post_title'] ?: 'Untitled', ENT_QUOTES, 'UTF-8');
     $code = $row['post_text'];
     $syntax = $row['post_syntax'];
-    
-    // Set up GeSHi for syntax highlighting
+
+    // Initialize GeSHi for syntax highlighting
     $geshi = new GeSHi($code, $syntax);
     $geshi->enable_line_numbers(GESHI_NORMAL_LINE_NUMBERS);
     $highlighted_code = $geshi->parse_code();
-} else {
-    die('Post not found');
+
+} catch (Exception $e) {
+    error_log("Print Error: " . $e->getMessage());
+    http_response_code(500);
+    $error_message = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+    if (isset($conn)) {
+        $conn->close();
+    }
 }
-$stmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Print: <?php echo $title; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style type="text/css">
+    <title>Print: <?php echo $title ?? 'Error'; ?></title>
+    <style>
         body {
             font-family: "Courier New", Courier, monospace;
             font-size: 13px;
@@ -94,6 +113,11 @@ $stmt->close();
             color: #333;
             cursor: pointer;
         }
+        .error {
+            color: #ff0000;
+            padding: 20px;
+            text-align: center;
+        }
         @media print {
             .no-print {
                 display: none;
@@ -102,28 +126,32 @@ $stmt->close();
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1><?php echo $title; ?></h1>
-        <div class="no-print">
-            <button onclick="window.print();" class="print-button">Print</button>
-            <button onclick="window.close();" class="print-button">Close</button>
+    <?php if (isset($error_message)): ?>
+        <div class="error"><?php echo $error_message; ?></div>
+    <?php else: ?>
+        <div class="header">
+            <h1><?php echo $title; ?></h1>
+            <div class="no-print">
+                <button onclick="window.print();" class="print-button">Print</button>
+                <button onclick="window.close();" class="print-button">Close</button>
+            </div>
         </div>
-    </div>
-    
-    <div class="code-container">
-        <?php echo $highlighted_code; ?>
-    </div>
-    
-    <div class="footer">
-        <p>Printed from <?php echo $config['site_name']; ?> - <?php echo date('Y-m-d H:i:s'); ?></p>
-    </div>
+        
+        <div class="code-container">
+            <?php echo $highlighted_code; ?>
+        </div>
+        
+        <div class="footer">
+            <p>Printed from <?php echo htmlspecialchars($config['site_name'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo date('Y-m-d H:i:s'); ?></p>
+        </div>
+    <?php endif; ?>
     
     <script>
         // Auto-print when page loads
-        window.onload = function() {
-            setTimeout(function() {
-                window.print();
-            }, 1000);
+        window.onload = () => {
+            if (!document.querySelector('.error')) {
+                setTimeout(() => window.print(), 1000);
+            }
         };
     </script>
 </body>

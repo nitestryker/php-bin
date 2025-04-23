@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Error page for user editpost directory
  *
@@ -14,16 +16,22 @@ require_once '../../include/db.php';
 require_once '../../include/session.php';
 require_once '../../classes/conn.class.php';
 
-$usr = "Unknown";
-if (isset($_GET['usr'])) {
-    $usr = htmlspecialchars($_GET['usr'], ENT_QUOTES, 'UTF-8');
-}
+// Start session with strict security settings
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure' => true,
+    'cookie_samesite' => 'Strict',
+    'use_strict_mode' => true
+]);
+
+// Sanitize user input
+$usr = htmlspecialchars($_GET['usr'] ?? 'Unknown', ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?=$config['site_name'];?></title>
+    <title><?=htmlspecialchars($config['site_name'] ?? 'PHP-Bin', ENT_QUOTES);?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="PHP Bin Error Page">
     <meta name="keywords" content="pastebin, code sharing, error"/>
@@ -48,7 +56,7 @@ if (isset($_GET['usr'])) {
             <div class="alert alert-error">
                 <h2>Error</h2>
                 <p>Sorry, an error occurred while processing your request.</p>
-                <p>User: <?=$usr;?></p>
+                <p>User: <?=htmlspecialchars($usr, ENT_QUOTES);?></p>
                 <p><a href="../../index.php" class="btn btn-primary">Return to Homepage</a></p>
             </div>
         </div>

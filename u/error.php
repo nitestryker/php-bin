@@ -1,4 +1,7 @@
+
 <?php
+declare(strict_types=1);
+
 /**
  * Error page for user directory
  *
@@ -23,7 +26,7 @@ if (isset($_GET['usr'])) {
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?=$config['site_name'];?></title>
+    <title><?=htmlspecialchars($config['site_name'] ?? '');?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="PHP Bin Error Page">
     <meta name="keywords" content="pastebin, code sharing, error"/>
@@ -39,12 +42,6 @@ if (isset($_GET['usr'])) {
     <![endif]-->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="text/javascript" src="../js/bootstrap.js"></script>
-    <script>
-        function textAreaAdjust(o) {
-            o.style.height = "1px";
-            o.style.height = (25 + o.scrollHeight) + "px";
-        }
-    </script>
 </head>
 
 <body>
@@ -54,7 +51,7 @@ if (isset($_GET['usr'])) {
             <div class="alert alert-error">
                 <h2>Error</h2>
                 <p>Sorry, an error occurred while processing your request.</p>
-                <p>User: <?=$usr;?></p>
+                <p>User: <?=htmlspecialchars($usr);?></p>
                 <p><a href="../index.php" class="btn btn-primary">Return to Homepage</a></p>
             </div>
         </div>

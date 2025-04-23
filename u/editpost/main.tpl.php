@@ -1,37 +1,55 @@
 <?php
+declare(strict_types=1);
+
 /**
-   main.tpl.php 
- * @package php-bin
- * @copyright Copyright (C) 2013 - 2015  Jeremy Stevens - jeremiahstevens@gmail.com
- * @copyright Copyright (C) 2013 - 2015  Nitestryker - nitestryker@gmail.com 
- * @copyright Copyight  (c) 2013 - 2015  Nitestryker Software Inc. 
- * @link http://jeremystevens.org
-*/
-error_reporting(0);
+ * main.tpl.php
+ * 
+ * @package PHP-Bin
+ * @author Jeremy Stevens
+ * @copyright 2014-2023 Jeremy Stevens
+ * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @version 2.0.0
+ */
+
 require_once '../../include/config.php';
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    $uid = $_SESSION['uid'];
-    $user = $_SESSION['username'];
-    $form = "Welcome <a href='../../u/$user'>" . $_SESSION['username'] . "</a>&nbsp;";
-    $form .= "<a href='../../logout.php'>logout</a>";
-    $uname = $_SESSION['username'];  
+require_once '../../classes/conn.class.php';
+
+// Initialize variables
+$form = '';
+$uname = '';
+
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    $uid = $_SESSION['uid'] ?? null;
+    $user = $_SESSION['username'] ?? '';
+    $uname = $user;
+
+    $form = sprintf(
+        'Welcome <a href="../../u/%1$s">%1$s</a>&nbsp;<a href="../../logout.php">logout</a>',
+        htmlspecialchars($user, ENT_QUOTES)
+    );
 } else {
-    $form = "<input type='hidden' name='login'>";
-    $form .= "<input class='span2' type='text' name='username' placeholder='User name'>";
-    $form .= "<input class='span2' type='password' name='password' placeholder='Password'>";
-    $form .= "<input type='submit' name='submit' value='Login' class='btn'/>";
-    $form .= "</form>";
-    $form .= "<ul class='nav pull-right'>";
-    $form .= "<li><a href='register.php'>Registration</a></li>";
+    $form = <<<HTML
+        <input type="hidden" name="login">
+        <input class="span2" type="text" name="username" placeholder="User name">
+        <input class="span2" type="password" name="password" placeholder="Password">
+        <input type="submit" name="submit" value="Login" class="btn"/>
+        </form>
+        <ul class="nav pull-right">
+        <li><a href="register.php">Registration</a></li>
+    HTML;
 }
-include_once '././../include/config.php';
-include_once '/../../classes/conn.class.php';
+
 if (isset($_POST['login'])) {
-    $cmd = new Conn();
-    $cmd->login($_POST['username'], $_POST['password']);
-    $location = $_SERVER['HTTP_REFERER'];
- header('Refresh:1; url=$location');
+    try {
+        $cmd = new Conn();
+        $cmd->login($_POST['username'] ?? '', $_POST['password'] ?? '');
+        $location = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+        header('Refresh: 1; url=' . htmlspecialchars($location, ENT_QUOTES));
+    } catch (Exception $e) {
+        error_log("Login error: " . $e->getMessage());
+    }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -251,7 +269,6 @@ if (isset($_POST['login'])) {
                             <p>
                                 <?php
 
-
                                 // check if users is logged in
                                 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
                                     $option = "<option value='private'>Private</option>";
@@ -301,7 +318,6 @@ if (isset($_POST['login'])) {
         $("[rel=tooltip]").tooltip();
     });
 </script>
-
 
 <footer class="span8">
 
